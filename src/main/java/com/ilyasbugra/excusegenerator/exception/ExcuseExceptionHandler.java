@@ -1,5 +1,6 @@
 package com.ilyasbugra.excusegenerator.exception;
 
+import com.ilyasbugra.excusegenerator.util.ErrorMessages;
 import com.ilyasbugra.excusegenerator.util.ExceptionResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,6 @@ public class ExcuseExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationErrors(MethodArgumentNotValidException ex) {
-
         logger.warn("Validation failed: {}", ex.getMessage());
 
         Map<String, String> fieldErrors = new HashMap<>();
@@ -30,7 +30,9 @@ public class ExcuseExceptionHandler {
 
         logger.warn("Validation errors: {}", fieldErrors);
 
-        ExceptionResponseBuilder response = ExceptionResponseBuilder.create(HttpStatus.BAD_REQUEST, "Validation error")
+        ExceptionResponseBuilder response = ExceptionResponseBuilder.create(
+                        HttpStatus.BAD_REQUEST,
+                        ErrorMessages.VALIDATION_ERROR)
                 .fields(fieldErrors);
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -38,30 +40,35 @@ public class ExcuseExceptionHandler {
 
     @ExceptionHandler(ExcuseNotFoundException.class)
     public ResponseEntity<Object> handleExcuseNotFound(ExcuseNotFoundException ex) {
-
         logger.warn("Excuse not found: {}", ex.getMessage());
 
-        ExceptionResponseBuilder response = ExceptionResponseBuilder.create(HttpStatus.NOT_FOUND, ex.getMessage());
+        ExceptionResponseBuilder response = ExceptionResponseBuilder.create(
+                HttpStatus.NOT_FOUND,
+                ex.getMessage()
+        );
 
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ExcuseCategoryNotFoundException.class)
     public ResponseEntity<Object> handleExcuseCategoryNotFound(ExcuseCategoryNotFoundException ex) {
-
         logger.warn("Excuse category not found: {}", ex.getMessage());
 
-        ExceptionResponseBuilder response = ExceptionResponseBuilder.create(HttpStatus.NOT_FOUND, ex.getMessage());
+        ExceptionResponseBuilder response = ExceptionResponseBuilder.create(
+                HttpStatus.NOT_FOUND,
+                ex.getMessage()
+        );
 
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneralError(Exception ex) {
-
         logger.error("Unexpected error: {}", ex.getMessage(), ex);
 
-        ExceptionResponseBuilder response = ExceptionResponseBuilder.create(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred.")
+        ExceptionResponseBuilder response = ExceptionResponseBuilder.create(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        ErrorMessages.UNEXPECTED_ERROR)
                 .addExtras("errorDetails", ex.getMessage());
 
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);

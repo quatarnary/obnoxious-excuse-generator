@@ -9,6 +9,7 @@ import com.ilyasbugra.excusegenerator.exception.InvalidInputException;
 import com.ilyasbugra.excusegenerator.mapper.ExcuseMapper;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
+import com.ilyasbugra.excusegenerator.util.ErrorMessages;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,22 +49,24 @@ public class ExcuseService {
     }
 
     public List<ExcuseDTO> getExcusesByCategory(String category) {
+        if (category == null || category.trim().isEmpty()) {
+            throw new InvalidInputException(ErrorMessages.EMPTY_CATEGORY);
+        }
+        if (category.length() > 50) {
+            throw new InvalidInputException(ErrorMessages.LARGE_CATEGORY);
+        }
+
         List<Excuse> allExcuses = excuseRepository.findByCategoryIgnoreCase(category);
         if (allExcuses.isEmpty()) {
             throw new ExcuseCategoryNotFoundException(category);
         }
+
         return allExcuses.stream()
                 .map(ExcuseMapper::toExcuseDTO)
                 .collect(Collectors.toList());
     }
 
     public ExcuseDTO createExcuse(CreateExcuseDTO createExcuseDTO) {
-        if (createExcuseDTO.getExcuseMessage() == null) {
-            throw new InvalidInputException("My soul may be empty but Excuse Message cannot be empty");
-        }
-        if (createExcuseDTO.getCategory() == null) {
-            throw new InvalidInputException("I may not have a direction but Category cannot be empty");
-        }
         Excuse excuse = ExcuseMapper.toExcuse(createExcuseDTO);
         Excuse savedExcuse = excuseRepository.save(excuse);
         return ExcuseMapper.toExcuseDTO(savedExcuse);

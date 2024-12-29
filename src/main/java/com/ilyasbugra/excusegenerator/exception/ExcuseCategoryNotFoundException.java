@@ -1,8 +1,10 @@
 package com.ilyasbugra.excusegenerator.exception;
 
+import com.ilyasbugra.excusegenerator.util.ErrorMessages;
+
 public class ExcuseCategoryNotFoundException extends RuntimeException {
 
     public ExcuseCategoryNotFoundException(String category) {
-        super("Excuse Category " + category + " not found. Check for typos and try again.");
+        super(String.format(ErrorMessages.CATEGORY_NOT_FOUND, category));
     }
 }
