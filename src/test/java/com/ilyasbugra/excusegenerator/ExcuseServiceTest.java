@@ -4,10 +4,12 @@ import com.ilyasbugra.excusegenerator.dto.CreateExcuseDTO;
 import com.ilyasbugra.excusegenerator.dto.ExcuseDTO;
 import com.ilyasbugra.excusegenerator.exception.ExcuseCategoryNotFoundException;
 import com.ilyasbugra.excusegenerator.exception.ExcuseNotFoundException;
+import com.ilyasbugra.excusegenerator.exception.InvalidInputException;
 import com.ilyasbugra.excusegenerator.mapper.ExcuseMapper;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
 import com.ilyasbugra.excusegenerator.service.ExcuseService;
+import com.ilyasbugra.excusegenerator.util.ErrorMessages;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -92,7 +94,7 @@ public class ExcuseServiceTest {
 
         Exception exception = assertThrows(ExcuseCategoryNotFoundException.class, () -> excuseService.getExcusesByCategory(category));
 
-        assertEquals("Excuse Category " + category + " not found. Check for typos and try again.", exception.getMessage());
+        assertEquals(String.format(ErrorMessages.CATEGORY_NOT_FOUND, category), exception.getMessage());
 
         verify(excuseRepository, times(1)).findByCategoryIgnoreCase(category);
     }
@@ -100,27 +102,19 @@ public class ExcuseServiceTest {
     @Test
     public void testGetExcusesByCategory_EmptyInput() {
         String category = "";
-        List<Excuse> excuses = new ArrayList<>();
-        when(excuseRepository.findByCategoryIgnoreCase(category)).thenReturn(excuses);
 
-        Exception exception = assertThrows(ExcuseCategoryNotFoundException.class, () -> excuseService.getExcusesByCategory(category));
+        Exception exception = assertThrows(InvalidInputException.class, () -> excuseService.getExcusesByCategory(category));
 
-        assertEquals("My soul may be empty but Excuse Category cannot be blank.", exception.getMessage());
-
-        verify(excuseRepository, times(1)).findByCategoryIgnoreCase(category);
+        assertEquals(String.format(ErrorMessages.EMPTY_CATEGORY, category), exception.getMessage());
     }
 
     @Test
     public void testGetExcusesByCategory_LargeInput() {
         String category = "loingloingloing loing loinng loin gloking liognnk loingk";
-        List<Excuse> excuses = new ArrayList<>();
-        when(excuseRepository.findByCategoryIgnoreCase(category)).thenReturn(excuses);
 
-        Exception exception = assertThrows(ExcuseCategoryNotFoundException.class, () -> excuseService.getExcusesByCategory(category));
+        Exception exception = assertThrows(InvalidInputException.class, () -> excuseService.getExcusesByCategory(category));
 
-        assertEquals("You cannot force more than 50 characters to a space that only can have 50 chars, please don't push your luck.", exception.getMessage());
-
-        verify(excuseRepository, times(1)).findByCategoryIgnoreCase(category);
+        assertEquals(String.format(ErrorMessages.LARGE_CATEGORY, category), exception.getMessage());
     }
 
     @Test
