@@ -48,6 +48,8 @@ public class ExcuseService {
         return ExcuseMapper.toExcuseDTO(allExcuses.get(random.nextInt(allExcuses.size())));
     }
 
+    // TODO: Consider moving category validation to controller layer in the future.
+    // Options: 1. Custom Validator 2. Wrapper DTO with @Valid
     public List<ExcuseDTO> getExcusesByCategory(String category) {
         if (category == null || category.trim().isEmpty()) {
             throw new InvalidInputException(ErrorMessages.EMPTY_CATEGORY);
