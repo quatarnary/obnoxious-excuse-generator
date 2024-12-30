@@ -18,10 +18,11 @@ import java.util.stream.Collectors;
 public class ExcuseService {
 
     private final ExcuseRepository excuseRepository;
-    private final Random random = new Random();
+    private final Random random;
 
-    public ExcuseService(ExcuseRepository excuseRepository) {
+    public ExcuseService(ExcuseRepository excuseRepository, Random random) {
         this.excuseRepository = excuseRepository;
+        this.random = random;
     }
 
     public List<ExcuseDTO> getAllExcuses() {
