@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator;
+package com.ilyasbugra.excusegenerator.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
