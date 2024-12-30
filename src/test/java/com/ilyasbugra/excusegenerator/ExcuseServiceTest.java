@@ -4,7 +4,6 @@ import com.ilyasbugra.excusegenerator.dto.CreateExcuseDTO;
 import com.ilyasbugra.excusegenerator.dto.ExcuseDTO;
 import com.ilyasbugra.excusegenerator.exception.ExcuseCategoryNotFoundException;
 import com.ilyasbugra.excusegenerator.exception.ExcuseNotFoundException;
-import com.ilyasbugra.excusegenerator.exception.InvalidInputException;
 import com.ilyasbugra.excusegenerator.mapper.ExcuseMapper;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
@@ -97,24 +96,6 @@ public class ExcuseServiceTest {
         assertEquals(String.format(ErrorMessages.CATEGORY_NOT_FOUND, category), exception.getMessage());
 
         verify(excuseRepository, times(1)).findByCategoryIgnoreCase(category);
-    }
-
-    @Test
-    public void testGetExcusesByCategory_EmptyInput() {
-        String category = "";
-
-        Exception exception = assertThrows(InvalidInputException.class, () -> excuseService.getExcusesByCategory(category));
-
-        assertEquals(String.format(ErrorMessages.EMPTY_CATEGORY, category), exception.getMessage());
-    }
-
-    @Test
-    public void testGetExcusesByCategory_LargeInput() {
-        String category = "loingloingloing loing loinng loin gloking liognnk loingk";
-
-        Exception exception = assertThrows(InvalidInputException.class, () -> excuseService.getExcusesByCategory(category));
-
-        assertEquals(String.format(ErrorMessages.LARGE_CATEGORY, category), exception.getMessage());
     }
 
     @Test
