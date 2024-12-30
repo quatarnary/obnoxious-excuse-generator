@@ -5,11 +5,9 @@ import com.ilyasbugra.excusegenerator.dto.ExcuseDTO;
 import com.ilyasbugra.excusegenerator.dto.UpdateExcuseDTO;
 import com.ilyasbugra.excusegenerator.exception.ExcuseCategoryNotFoundException;
 import com.ilyasbugra.excusegenerator.exception.ExcuseNotFoundException;
-import com.ilyasbugra.excusegenerator.exception.InvalidInputException;
 import com.ilyasbugra.excusegenerator.mapper.ExcuseMapper;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
-import com.ilyasbugra.excusegenerator.util.ErrorMessages;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,16 +46,7 @@ public class ExcuseService {
         return ExcuseMapper.toExcuseDTO(allExcuses.get(random.nextInt(allExcuses.size())));
     }
 
-    // TODO: Consider moving category validation to controller layer in the future.
-    // Options: 1. Custom Validator 2. Wrapper DTO with @Valid
     public List<ExcuseDTO> getExcusesByCategory(String category) {
-        if (category == null || category.trim().isEmpty()) {
-            throw new InvalidInputException(ErrorMessages.EMPTY_CATEGORY);
-        }
-        if (category.length() > 50) {
-            throw new InvalidInputException(ErrorMessages.LARGE_CATEGORY);
-        }
-
         List<Excuse> allExcuses = excuseRepository.findByCategoryIgnoreCase(category);
         if (allExcuses.isEmpty()) {
             throw new ExcuseCategoryNotFoundException(category);

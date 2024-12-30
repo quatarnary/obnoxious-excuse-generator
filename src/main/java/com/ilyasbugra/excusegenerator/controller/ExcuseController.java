@@ -3,7 +3,9 @@ package com.ilyasbugra.excusegenerator.controller;
 import com.ilyasbugra.excusegenerator.dto.CreateExcuseDTO;
 import com.ilyasbugra.excusegenerator.dto.ExcuseDTO;
 import com.ilyasbugra.excusegenerator.dto.UpdateExcuseDTO;
+import com.ilyasbugra.excusegenerator.exception.InvalidInputException;
 import com.ilyasbugra.excusegenerator.service.ExcuseService;
+import com.ilyasbugra.excusegenerator.util.ErrorMessages;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +38,7 @@ public class ExcuseController {
 
     @GetMapping("/category/{category}")
     public List<ExcuseDTO> getExcusesByCategory(@PathVariable String category) {
+        validateCategory(category);
         return excuseService.getExcusesByCategory(category);
     }
 
@@ -52,5 +55,14 @@ public class ExcuseController {
     @DeleteMapping("/{id}")
     public void deleteExcuse(@PathVariable Long id) {
         excuseService.deleteExcuse(id);
+    }
+
+    private void validateCategory(String category) {
+        if (category == null || category.trim().isEmpty()) {
+            throw new InvalidInputException(ErrorMessages.EMPTY_CATEGORY);
+        }
+        if (category.length() > 50) {
+            throw new InvalidInputException(ErrorMessages.LARGE_CATEGORY);
+        }
     }
 }
