@@ -147,4 +147,17 @@ public class ExcuseServiceTest {
         verify(excuseRepository, times(1)).findById(id);
         verify(excuseRepository, times(1)).save(excuse);
     }
+
+    @Test
+    public void testDeleteExcuse() {
+        Long id = 1L;
+
+        when(excuseRepository.existsById(id)).thenReturn(true);
+        doNothing().when(excuseRepository).deleteById(id);
+
+        excuseService.deleteExcuse(id);
+
+        verify(excuseRepository, times(1)).existsById(id);
+        verify(excuseRepository, times(1)).deleteById(id);
+    }
 }
