@@ -19,6 +19,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -67,6 +68,43 @@ public class ExcuseServiceTest {
 
         assertThrows(ExcuseNotFoundException.class, () -> excuseService.getExcuseById(1L));
         verify(excuseRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    public void testGetRandomExcuse() {
+        Long firstId = 1L;
+        String firstCategory = "first category";
+        String firstExcuseMessage = "first excuse";
+        Long secondId = 2L;
+        String secondCategory = "second category";
+        String secondExcuseMessage = "second excuse";
+
+        List<Excuse> excuses = List.of(
+                Excuse.builder()
+                        .id(firstId)
+                        .category(firstCategory)
+                        .excuseMessage(firstExcuseMessage)
+                        .build(),
+                Excuse.builder()
+                        .id(secondId)
+                        .category(secondCategory)
+                        .excuseMessage(secondExcuseMessage)
+                        .build()
+        );
+
+        when(excuseRepository.findAll()).thenReturn(excuses);
+
+        Random mockRandom = mock(Random.class);
+        when(mockRandom.nextInt(2)).thenReturn(0);
+
+        ExcuseService mockExcuseServiceWithRandom = new ExcuseService(excuseRepository, mockRandom);
+        ExcuseDTO result = mockExcuseServiceWithRandom.getRandomExcuse();
+
+        assertNotNull(result);
+        assertEquals(firstCategory, result.getCategory());
+        assertEquals(firstExcuseMessage, result.getExcuseMessage());
+
+        verify(excuseRepository, times(1)).findAll();
     }
 
     @Test
