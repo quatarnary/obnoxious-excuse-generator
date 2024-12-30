@@ -2,6 +2,7 @@ package com.ilyasbugra.excusegenerator;
 
 import com.ilyasbugra.excusegenerator.dto.CreateExcuseDTO;
 import com.ilyasbugra.excusegenerator.dto.ExcuseDTO;
+import com.ilyasbugra.excusegenerator.dto.UpdateExcuseDTO;
 import com.ilyasbugra.excusegenerator.exception.ExcuseCategoryNotFoundException;
 import com.ilyasbugra.excusegenerator.exception.ExcuseNotFoundException;
 import com.ilyasbugra.excusegenerator.mapper.ExcuseMapper;
@@ -108,6 +109,42 @@ public class ExcuseServiceTest {
 
         assertNotNull(result);
         assertEquals("School", result.getCategory());
+        verify(excuseRepository, times(1)).save(excuse);
+    }
+
+    @Test
+    public void testUpdateExcuse() {
+        Long id = 1L;
+        String existingCategory = "existing category";
+        String existingExcuse = "existing excuse";
+        String newCategory = "new category";
+        String newExcuse = "new excuse";
+
+        UpdateExcuseDTO updateExcuseDTO = UpdateExcuseDTO.builder()
+                .excuseMessage(newExcuse)
+                .category(newCategory)
+                .build();
+        Excuse excuse = Excuse.builder()
+                .id(id)
+                .excuseMessage(existingExcuse)
+                .category(existingCategory)
+                .build();
+        Excuse updatedExcuse = Excuse.builder()
+                .id(id)
+                .excuseMessage(newExcuse)
+                .category(newCategory)
+                .build();
+
+        when(excuseRepository.findById(id)).thenReturn(Optional.of(excuse));
+        when(excuseRepository.save(excuse)).thenReturn(updatedExcuse);
+
+        ExcuseDTO result = excuseService.updateExcuse(id, updateExcuseDTO);
+
+        assertNotNull(result);
+        assertEquals(newExcuse, result.getExcuseMessage());
+        assertEquals(newCategory, result.getCategory());
+
+        verify(excuseRepository, times(1)).findById(id);
         verify(excuseRepository, times(1)).save(excuse);
     }
 }
