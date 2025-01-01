@@ -142,6 +142,30 @@ public class ExcuseControllerTest {
     }
 
     @Test
+    void testGetExcuseById_NoId() throws Exception {
+        mockMvc.perform(get(URI_BASE + "/"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testGetExcuseById_NonNumericId() throws Exception {
+        mockMvc.perform(get(URI_BASE + "/"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testGetExcuseById_NegativeId() throws Exception {
+        mockMvc.perform(get(URI_BASE + "/-1"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testGetExcuseById_TooLargeId() throws Exception {
+        mockMvc.perform(get(URI_BASE + "/999999999999999999"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void testGetExcusesByCategory_CaseInsensitive() throws Exception {
         when(excuseService.getExcusesByCategory(WORK_CATEGORY)).thenReturn(WORK_CATEGORY_EXCUSE_DTOS);
 
