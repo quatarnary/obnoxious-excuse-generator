@@ -20,6 +20,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -149,7 +150,8 @@ public class ExcuseControllerTest {
 
     @Test
     void testGetExcuseById_NonNumericId() throws Exception {
-        mockMvc.perform(get(URI_BASE + "/"))
+        mockMvc.perform(get(URI_BASE + "/abc"))
+                .andDo(print())
                 .andExpect(status().isBadRequest());
     }
 
