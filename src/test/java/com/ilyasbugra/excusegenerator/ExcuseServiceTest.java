@@ -16,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -26,9 +25,18 @@ import static org.mockito.Mockito.*;
 
 public class ExcuseServiceTest {
 
+    private static final Excuse excuseEntity1 = Excuse.builder()
+            .id(1L)
+            .excuseMessage("I was abducted by aliens.")
+            .category("Work")
+            .build();
+    private static final Excuse excuseEntity2 = Excuse.builder()
+            .id(2L)
+            .excuseMessage("My dog ate me.")
+            .category("School")
+            .build();
     @InjectMocks
     private ExcuseService excuseService;
-
     @Mock
     private ExcuseRepository excuseRepository;
 
@@ -39,9 +47,7 @@ public class ExcuseServiceTest {
 
     @Test
     public void testGetAllExcuses() {
-        List<Excuse> excuses = new ArrayList<>();
-        excuses.add(new Excuse(1L, "I was abducted by aliens.", "Work"));
-        excuses.add(new Excuse(2L, "My dog ate me.", "School"));
+        List<Excuse> excuses = List.of(excuseEntity1, excuseEntity2);
         when(excuseRepository.findAll()).thenReturn(excuses);
 
         List<ExcuseDTO> result = excuseService.getAllExcuses();
@@ -52,13 +58,13 @@ public class ExcuseServiceTest {
 
     @Test
     public void testGetExcuseById() {
-        Excuse excuse = new Excuse(1L, "My dog ate me.", "School");
+        Excuse excuse = excuseEntity1;
         when(excuseRepository.findById(1L)).thenReturn(Optional.of(excuse));
 
         ExcuseDTO result = excuseService.getExcuseById(1L);
 
         assertNotNull(result);
-        assertEquals("School", result.getCategory());
+        assertEquals(excuseEntity1.getCategory(), result.getCategory());
         verify(excuseRepository, times(1)).findById(1L);
     }
 
@@ -72,25 +78,7 @@ public class ExcuseServiceTest {
 
     @Test
     public void testGetRandomExcuse() {
-        Long firstId = 1L;
-        String firstCategory = "first category";
-        String firstExcuseMessage = "first excuse";
-        Long secondId = 2L;
-        String secondCategory = "second category";
-        String secondExcuseMessage = "second excuse";
-
-        List<Excuse> excuses = List.of(
-                Excuse.builder()
-                        .id(firstId)
-                        .category(firstCategory)
-                        .excuseMessage(firstExcuseMessage)
-                        .build(),
-                Excuse.builder()
-                        .id(secondId)
-                        .category(secondCategory)
-                        .excuseMessage(secondExcuseMessage)
-                        .build()
-        );
+        List<Excuse> excuses = List.of(excuseEntity1, excuseEntity2);
 
         when(excuseRepository.findAll()).thenReturn(excuses);
 
@@ -101,25 +89,23 @@ public class ExcuseServiceTest {
         ExcuseDTO result = mockExcuseServiceWithRandom.getRandomExcuse();
 
         assertNotNull(result);
-        assertEquals(firstCategory, result.getCategory());
-        assertEquals(firstExcuseMessage, result.getExcuseMessage());
+        assertEquals(excuses.getFirst().getCategory(), result.getCategory());
+        assertEquals(excuses.getFirst().getExcuseMessage(), result.getExcuseMessage());
 
         verify(excuseRepository, times(1)).findAll();
     }
 
     @Test
     public void testGetExcusesByCategory() {
-        String category = "Personal";
-        List<Excuse> excuses = new ArrayList<>();
-        excuses.add(new Excuse(1L, "I overslept.", category));
-        excuses.add(new Excuse(2L, "My car broke down.", category));
+        String category = "Work";
+        List<Excuse> excuses = List.of(excuseEntity1, excuseEntity1);
         when(excuseRepository.findByCategoryIgnoreCase(category)).thenReturn(excuses);
 
         List<ExcuseDTO> result = excuseService.getExcusesByCategory(category);
 
         assertEquals(2, result.size());
-        assertEquals("I overslept.", result.get(0).getExcuseMessage());
-        assertEquals("My car broke down.", result.get(1).getExcuseMessage());
+        assertEquals(excuses.get(0).getCategory(), result.get(0).getCategory());
+        assertEquals(excuses.get(1).getCategory(), result.get(1).getCategory());
 
         verify(excuseRepository, times(1)).findByCategoryIgnoreCase(category);
     }
@@ -127,8 +113,6 @@ public class ExcuseServiceTest {
     @Test
     public void testGetExcusesByCategory_NotFound() {
         String category = "NonExistent";
-        List<Excuse> excuses = new ArrayList<>();
-        when(excuseRepository.findByCategoryIgnoreCase(category)).thenReturn(excuses);
 
         Exception exception = assertThrows(ExcuseCategoryNotFoundException.class, () -> excuseService.getExcusesByCategory(category));
 
@@ -153,8 +137,6 @@ public class ExcuseServiceTest {
     @Test
     public void testUpdateExcuse() {
         Long id = 1L;
-        String existingCategory = "existing category";
-        String existingExcuse = "existing excuse";
         String newCategory = "new category";
         String newExcuse = "new excuse";
 
@@ -162,19 +144,11 @@ public class ExcuseServiceTest {
                 .excuseMessage(newExcuse)
                 .category(newCategory)
                 .build();
-        Excuse excuse = Excuse.builder()
-                .id(id)
-                .excuseMessage(existingExcuse)
-                .category(existingCategory)
-                .build();
-        Excuse updatedExcuse = Excuse.builder()
-                .id(id)
-                .excuseMessage(newExcuse)
-                .category(newCategory)
-                .build();
+
+        Excuse excuse = excuseEntity1;
 
         when(excuseRepository.findById(id)).thenReturn(Optional.of(excuse));
-        when(excuseRepository.save(excuse)).thenReturn(updatedExcuse);
+        when(excuseRepository.save(excuse)).thenReturn(excuse);
 
         ExcuseDTO result = excuseService.updateExcuse(id, updateExcuseDTO);
 
