@@ -12,6 +12,7 @@ public class ExcuseMapper {
                 .id(excuse.getId())
                 .excuseMessage(excuse.getExcuseMessage())
                 .category(excuse.getCategory())
+                .updatedAt(excuse.getUpdatedAt())
                 .build();
     }
 

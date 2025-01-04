@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -18,8 +20,26 @@ public class Excuse {
     private Long id;
 
     @Column(nullable = false)
-    private String excuseMessage; // Make sure the field name is exactly this.
+    private String excuseMessage;
 
     @Column(nullable = false)
-    private String category; // Make sure this matches too.
+    private String category;
+
+    @Column(nullable = false, updatable = false)
+    private Date createdAt;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        Date now = new Date();
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = new Date();
+    }
 }
