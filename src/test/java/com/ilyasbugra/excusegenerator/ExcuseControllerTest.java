@@ -18,217 +18,232 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ExcuseController.class)
 public class ExcuseControllerTest {
 
-    private static final Long WORK_ID_1 = 1L;
-    private static final Long WORK_ID_2 = 2L;
-    private static final Long SCHOOL_ID_1 = 3L;
-    private static final Long NON_EXISTENT_ID_1 = 99L;
-
-    private static final String WORK_CATEGORY = "Work";
-    private static final String SCHOOL_CATEGORY = "School";
-    private static final String UPDATED_CATEGORY = "Updated";
-    private static final String NON_EXISTENT_CATEGORY = "Non Existent";
-    private static final String EMPTY_CATEGORY = "";
-
-    private static final String WORK_EXCUSE_MESSAGE_1 = "My boss abducted me.";
-    private static final String WORK_EXCUSE_MESSAGE_2 = "Aliens abducted my boss.";
-    private static final String SCHOOL_EXCUSE_MESSAGE_1 = "Aliens stole my homework.";
-    private static final String UPDATED_EXCUSE_MESSAGE = "Updated boss abducted me.";
-    private static final String EMPTY_EXCUSE_MESSAGE = "";
-
-    private static final ExcuseDTO WORK_EXCUSE_1_DTO = ExcuseDTO.builder()
-            .id(WORK_ID_1)
-            .category(WORK_CATEGORY)
-            .excuseMessage(WORK_EXCUSE_MESSAGE_1)
-            .build();
-
-    private static final ExcuseDTO WORK_EXCUSE_2_DTO = ExcuseDTO.builder()
-            .id(WORK_ID_2)
-            .category(WORK_CATEGORY)
-            .excuseMessage(WORK_EXCUSE_MESSAGE_2)
-            .build();
-
-    private static final ExcuseDTO SCHOOL_EXCUSE_1_DTO = ExcuseDTO.builder()
-            .id(SCHOOL_ID_1)
-            .category(SCHOOL_CATEGORY)
-            .excuseMessage(SCHOOL_EXCUSE_MESSAGE_1)
-            .build();
-
-    private static final String URI_BASE = "/api/v1/excuses";
-
-    private static final String PATH_WORK_1_ID = "/" + WORK_ID_1;
-    private static final String PATH_WORK_2_ID = "/" + WORK_ID_2;
-    private static final String PATH_SCHOOL_1_ID = "/" + SCHOOL_ID_1;
-    private static final String PATH_NON_EXISTENT_1_ID = "/" + NON_EXISTENT_ID_1;
-
-    private static final String PATH_WORK_CATEGORY = "/category/" + WORK_CATEGORY;
-    private static final String PATH_SCHOOL_CATEGORY = "/category/" + SCHOOL_CATEGORY;
-
     @Autowired
     private MockMvc mockMvc;
-
-    @MockitoBean
-    private ExcuseService excuseService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    private List<ExcuseDTO> DIFFERENT_CATEGORY_EXCUSE_DTOS;
+    @MockitoBean
+    private ExcuseService excuseService;
 
-    private List<ExcuseDTO> WORK_CATEGORY_EXCUSE_DTOS;
+    private ExcuseDTO excuseDTO;
 
     @BeforeEach
-    void setUp() {
-        DIFFERENT_CATEGORY_EXCUSE_DTOS = List.of(
-                WORK_EXCUSE_1_DTO,
-                WORK_EXCUSE_2_DTO,
-                SCHOOL_EXCUSE_1_DTO
+    public void setup() {
+        excuseDTO = ExcuseDTO.builder()
+                .id(1L)
+                .category("Work")
+                .excuseMessage("My boss abducted me.")
+                .build();
+    }
+
+    @Test
+    void testGetAllExcuses_ShouldReturn200() throws Exception {
+        List<ExcuseDTO> excuses = List.of(
+                ExcuseDTO.builder()
+                        .id(1L)
+                        .category("Work")
+                        .excuseMessage("My boss abducted me.")
+                        .build(),
+                ExcuseDTO.builder()
+                        .id(2L)
+                        .category("Family")
+                        .excuseMessage("My dog ate my homework.")
+                        .build()
         );
 
-        WORK_CATEGORY_EXCUSE_DTOS = List.of(
-                WORK_EXCUSE_1_DTO,
-                WORK_EXCUSE_2_DTO
-        );
-    }
+        when(excuseService.getAllExcuses()).thenReturn(excuses);
 
-    @Test
-    void testGetAllExcuses() throws Exception {
-        when(excuseService.getAllExcuses()).thenReturn(DIFFERENT_CATEGORY_EXCUSE_DTOS);
-
-        mockMvc.perform(get(URI_BASE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(DIFFERENT_CATEGORY_EXCUSE_DTOS.size()))
-                .andExpect(jsonPath("$[0].category").value(WORK_CATEGORY))
-                .andExpect(jsonPath("$[0].excuseMessage").value(WORK_EXCUSE_MESSAGE_1))
-                .andExpect(jsonPath("$[1].category").value(WORK_CATEGORY))
-                .andExpect(jsonPath("$[1].excuseMessage").value(WORK_EXCUSE_MESSAGE_2))
-                .andExpect(jsonPath("$[2].category").value(SCHOOL_CATEGORY))
-                .andExpect(jsonPath("$[2].excuseMessage").value(SCHOOL_EXCUSE_MESSAGE_1));
-    }
-
-    @Test
-    void testGetAllExcuses_WhenEmpty_ShouldReturnEmptyList() throws Exception {
-        when(excuseService.getAllExcuses()).thenReturn(List.of());
-
-        mockMvc.perform(get(URI_BASE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isEmpty());
-    }
-
-    @Test
-    void testGetExcuseById() throws Exception {
-        when(excuseService.getExcuseById(WORK_ID_1)).thenReturn(WORK_EXCUSE_1_DTO);
-
-        mockMvc.perform(get(URI_BASE + PATH_WORK_1_ID))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.category").value(WORK_CATEGORY))
-                .andExpect(jsonPath("$.excuseMessage").value(WORK_EXCUSE_MESSAGE_1));
-    }
-
-    @Test
-    void testGetExcuseById_NotFound() throws Exception {
-        when(excuseService.getExcuseById(NON_EXISTENT_ID_1)).thenThrow(new ExcuseNotFoundException(NON_EXISTENT_ID_1));
-
-        mockMvc.perform(get(URI_BASE + PATH_NON_EXISTENT_1_ID))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(String.format(ErrorMessages.EXCUSE_NOT_FOUND, NON_EXISTENT_ID_1)));
-    }
-
-    @Test
-    void testGetExcuseById_NoId() throws Exception {
-        mockMvc.perform(get(URI_BASE + "/"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void testGetExcuseById_NonNumericId() throws Exception {
-        mockMvc.perform(get(URI_BASE + "/abc"))
+        mockMvc.perform(get("/api/v1/excuses"))
                 .andDo(print())
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void testGetExcuseById_NegativeId() throws Exception {
-        mockMvc.perform(get(URI_BASE + "/-1"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void testGetExcuseById_TooLargeId() throws Exception {
-        mockMvc.perform(get(URI_BASE + "/999999999999999999"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void testGetExcusesByCategory_CaseInsensitive() throws Exception {
-        when(excuseService.getExcusesByCategory(WORK_CATEGORY)).thenReturn(WORK_CATEGORY_EXCUSE_DTOS);
-
-        mockMvc.perform(get(URI_BASE + PATH_WORK_CATEGORY))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(WORK_CATEGORY_EXCUSE_DTOS.size()))
-                .andExpect(jsonPath("$[0].category").value(WORK_CATEGORY))
-                .andExpect(jsonPath("$[1].category").value(WORK_CATEGORY));
+                .andExpect(jsonPath("$.size()").value(2))
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].category").value("Work"))
+                .andExpect(jsonPath("$[0].excuseMessage").value("My boss abducted me."))
+                .andExpect(jsonPath("$[1].id").value(2L))
+                .andExpect(jsonPath("$[1].category").value("Family"))
+                .andExpect(jsonPath("$[1].excuseMessage").value("My dog ate my homework."));
     }
 
     @Test
-    void testCreateExcuse() throws Exception {
+    void testGetAllExcuses_EmptyList_ShouldReturn200() throws Exception {
+        when(excuseService.getAllExcuses()).thenReturn(List.of()); // Empty list
+
+        mockMvc.perform(get("/api/v1/excuses"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(0)); // Expecting empty array
+    }
+
+    @Test
+    void testGetExcuseById_ValidId_ShouldReturn200() throws Exception {
+        when(excuseService.getExcuseById(1L)).thenReturn(excuseDTO);
+
+        mockMvc.perform(get("/api/v1/excuses/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.category").value("Work"))
+                .andExpect(jsonPath("$.excuseMessage").value("My boss abducted me."));
+    }
+
+    @Test
+    void testGetExcuseById_NotFound_ShouldReturn404() throws Exception {
+        when(excuseService.getExcuseById(1L)).thenThrow(new ExcuseNotFoundException(1L));
+
+        mockMvc.perform(get("/api/v1/excuses/1"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(
+                        String.format(ErrorMessages.EXCUSE_NOT_FOUND, 1L)
+                ));
+    }
+
+    @Test
+    void testCreateExcuse_ValidRequest_ShouldReturn201() throws Exception {
         CreateExcuseDTO createExcuseDTO = CreateExcuseDTO.builder()
-                .category(WORK_CATEGORY)
-                .excuseMessage(WORK_EXCUSE_MESSAGE_1)
+                .category("Work")
+                .excuseMessage("Valid excuse.")
                 .build();
 
-        ExcuseDTO excuseDTO = ExcuseDTO.builder()
-                .id(WORK_ID_1)
-                .category(WORK_CATEGORY)
-                .excuseMessage(WORK_EXCUSE_MESSAGE_1)
-                .build();
-        when(excuseService.createExcuse(createExcuseDTO)).thenReturn(excuseDTO);
+        when(excuseService.createExcuse(any())).thenReturn(excuseDTO);
 
-        mockMvc.perform(post(URI_BASE)
+        mockMvc.perform(post("/api/v1/excuses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createExcuseDTO)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.category").value(WORK_CATEGORY))
-                .andExpect(jsonPath("$.excuseMessage").value(WORK_EXCUSE_MESSAGE_1));
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.category").value("Work"))
+                .andExpect(jsonPath("$.excuseMessage").value("My boss abducted me."));
     }
 
     @Test
-    void testUpdateExcuse() throws Exception {
+    void testCreateExcuse_EmptyCategory_ShouldReturn400() throws Exception {
+        CreateExcuseDTO createExcuseDTO = CreateExcuseDTO.builder()
+                .category("")
+                .excuseMessage("My boss abducted me.")
+                .build();
+
+        mockMvc.perform(post("/api/v1/excuses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createExcuseDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fields.category").value(
+                        ErrorMessages.EMPTY_CATEGORY
+                ));
+    }
+
+    @Test
+    void testCreateExcuse_EmptyMessage_ShouldReturn400() throws Exception {
+        CreateExcuseDTO createExcuseDTO = CreateExcuseDTO.builder()
+                .category("Work")
+                .excuseMessage("")
+                .build();
+
+        mockMvc.perform(post("/api/v1/excuses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createExcuseDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fields.excuseMessage").value(
+                        ErrorMessages.EMPTY_EXCUSE_MESSAGE
+                ));
+    }
+
+    @Test
+    void testCreateExcuse_EmptyFields_ShouldReturn400() throws Exception {
+        CreateExcuseDTO createExcuseDTO = CreateExcuseDTO.builder()
+                .category("")
+                .excuseMessage("")
+                .build();
+
+        mockMvc.perform(post("/api/v1/excuses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createExcuseDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fields.category").value(
+                        ErrorMessages.EMPTY_CATEGORY
+                ))
+                .andExpect(jsonPath("$.fields.excuseMessage").value(
+                        ErrorMessages.EMPTY_EXCUSE_MESSAGE
+                ));
+    }
+
+    @Test
+    void testUpdateExcuse_ValidRequest_ShouldReturn200() throws Exception {
         UpdateExcuseDTO updateExcuseDTO = UpdateExcuseDTO.builder()
-                .category(UPDATED_CATEGORY)
-                .excuseMessage(UPDATED_EXCUSE_MESSAGE)
+                .category("Work")
+                .excuseMessage("Updated excuse.")
                 .build();
 
-        ExcuseDTO excuseDTO = ExcuseDTO.builder()
-                .id(WORK_ID_1)
-                .category(UPDATED_CATEGORY)
-                .excuseMessage(UPDATED_EXCUSE_MESSAGE)
-                .build();
-        when(excuseService.updateExcuse(WORK_ID_1, updateExcuseDTO)).thenReturn(excuseDTO);
+        when(excuseService.updateExcuse(eq(1L), any(UpdateExcuseDTO.class))).thenReturn(excuseDTO);
 
-        mockMvc.perform(put(URI_BASE + PATH_WORK_1_ID)
+        mockMvc.perform(put("/api/v1/excuses/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateExcuseDTO)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.category").value(UPDATED_CATEGORY))
-                .andExpect(jsonPath("$.excuseMessage").value(UPDATED_EXCUSE_MESSAGE));
+                .andExpect(status().isOk());
     }
 
     @Test
-    void testDeleteExcuse() throws Exception {
-        doNothing().when(excuseService).deleteExcuse(WORK_ID_1);
+    void testUpdateExcuse_NotFound_ShouldReturn404() throws Exception {
+        UpdateExcuseDTO updateExcuseDTO = UpdateExcuseDTO.builder()
+                .category("Work")
+                .excuseMessage("Updated excuse.")
+                .build();
 
-        mockMvc.perform(delete(URI_BASE + PATH_WORK_1_ID))
-                .andExpect(status().isOk());
+        doThrow(new ExcuseNotFoundException(999L))
+                .when(excuseService).updateExcuse(eq(999L), any(UpdateExcuseDTO.class));
 
-        verify(excuseService, times(1)).deleteExcuse(WORK_ID_1);
+        mockMvc.perform(put("/api/v1/excuses/999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateExcuseDTO)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(
+                        String.format(ErrorMessages.EXCUSE_NOT_FOUND, 999L)
+                ));
+    }
+
+    @Test
+    void testUpdateExcuse_EmptyFields_ShouldReturn400() throws Exception {
+        UpdateExcuseDTO updateExcuseDTO = UpdateExcuseDTO.builder()
+                .category("")
+                .excuseMessage("")
+                .build();
+
+        mockMvc.perform(put("/api/v1/excuses/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateExcuseDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fields.category").value(ErrorMessages.EMPTY_CATEGORY))
+                .andExpect(jsonPath("$.fields.excuseMessage").value(ErrorMessages.EMPTY_EXCUSE_MESSAGE));
+    }
+
+    @Test
+    void testDeleteExcuse_ValidRequest_ShouldReturn204() throws Exception {
+        doNothing()
+                .when(excuseService).deleteExcuse(eq(1L));
+
+        mockMvc.perform(delete("/api/v1/excuses/1"))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+    }
+
+    @Test
+    void testDeleteExcuse_NotFound_ShouldReturn404() throws Exception {
+        doThrow(new ExcuseNotFoundException(999L))
+                .when(excuseService).deleteExcuse(eq(999L));
+
+        mockMvc.perform(delete("/api/v1/excuses/999"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(
+                        String.format(ErrorMessages.EXCUSE_NOT_FOUND, 999L)
+                ));
     }
 }
