@@ -99,7 +99,7 @@ public class ExcuseServiceTest {
     public void testGetExcusesByCategory() {
         String category = "Work";
         List<Excuse> excuses = List.of(excuseEntity1, excuseEntity1);
-        when(excuseRepository.findByCategoryIgnoreCase(category)).thenReturn(excuses);
+        when(excuseRepository.findByCategoryContainingIgnoreCase(category)).thenReturn(excuses);
 
         List<ExcuseDTO> result = excuseService.getExcusesByCategory(category);
 
@@ -107,7 +107,7 @@ public class ExcuseServiceTest {
         assertEquals(excuses.get(0).getCategory(), result.get(0).getCategory());
         assertEquals(excuses.get(1).getCategory(), result.get(1).getCategory());
 
-        verify(excuseRepository, times(1)).findByCategoryIgnoreCase(category);
+        verify(excuseRepository, times(1)).findByCategoryContainingIgnoreCase(category);
     }
 
     @Test
@@ -118,7 +118,7 @@ public class ExcuseServiceTest {
 
         assertEquals(String.format(ErrorMessages.CATEGORY_NOT_FOUND, category), exception.getMessage());
 
-        verify(excuseRepository, times(1)).findByCategoryIgnoreCase(category);
+        verify(excuseRepository, times(1)).findByCategoryContainingIgnoreCase(category);
     }
 
     @Test

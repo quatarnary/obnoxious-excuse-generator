@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface ExcuseRepository extends JpaRepository<Excuse, Long> {
 
-    List<Excuse> findByCategoryIgnoreCase(String category);
+    List<Excuse> findByCategoryContainingIgnoreCase(String category);
 }

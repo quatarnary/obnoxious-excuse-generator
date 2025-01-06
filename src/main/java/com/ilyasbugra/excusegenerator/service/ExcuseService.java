@@ -48,7 +48,7 @@ public class ExcuseService {
     }
 
     public List<ExcuseDTO> getExcusesByCategory(String category) {
-        List<Excuse> allExcuses = excuseRepository.findByCategoryIgnoreCase(category);
+        List<Excuse> allExcuses = excuseRepository.findByCategoryContainingIgnoreCase(category);
         if (allExcuses.isEmpty()) {
             throw new ExcuseCategoryNotFoundException(category);
         }
