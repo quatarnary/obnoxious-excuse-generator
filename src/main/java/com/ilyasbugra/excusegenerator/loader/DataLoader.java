@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +25,6 @@ public class DataLoader implements CommandLineRunner {
         this.excuseRepository = excuseRepository;
     }
 
-    @Transactional // TODO: remove transactional later...
     @Override
     public void run(String... args) throws Exception {
         long excuseCount = excuseRepository.count();
