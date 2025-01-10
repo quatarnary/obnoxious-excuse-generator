@@ -39,6 +39,7 @@ public class ExcuseService {
         return ExcuseMapper.toExcuseDTO(excuse);
     }
 
+    // TODO: CHANGE THE FREAKING excuseRepository.findAll(). we don't need to get all of the data then find the random numbered one. We can jsut get the random number and call findById(random_fucking_number)... This now takes 3 second to run!!!
     public ExcuseDTO getRandomExcuse() {
         List<Excuse> allExcuses = excuseRepository.findAll();
         if (allExcuses.isEmpty()) {
