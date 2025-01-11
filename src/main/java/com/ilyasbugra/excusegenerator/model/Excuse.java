@@ -13,6 +13,9 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "excuse", indexes = {
+        @Index(name = "idx_category", columnList = "category")
+})
 public class Excuse {
 
     @Id
