@@ -28,16 +28,16 @@ public class ExcuseController {
         this.excuseService = excuseService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<ExcuseDTO>> getAllExcuses() {
-        logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
-
-        List<ExcuseDTO> excuses = excuseService.getAllExcuses();
-
-        logger.info("Fetched {} excuses", excuses.size());
-
-        return ResponseEntity.ok(excuses);
-    }
+//    @GetMapping
+//    public ResponseEntity<List<ExcuseDTO>> getAllExcuses() {
+//        logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
+//
+//        List<ExcuseDTO> excuses = excuseService.getAllExcuses();
+//
+//        logger.info("Fetched {} excuses", excuses.size());
+//
+//        return ResponseEntity.ok(excuses);
+//    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ExcuseDTO> getExcuseById(@PathVariable Long id) {
@@ -50,16 +50,16 @@ public class ExcuseController {
         return ResponseEntity.ok(excuse);
     }
 
-    @GetMapping("/random")
-    public ResponseEntity<ExcuseDTO> getRandomExcuse() {
-        logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
-
-        ExcuseDTO excuse = excuseService.getRandomExcuse();
-
-        logger.info("Fetched random excuse with id {}", excuse.getId());
-
-        return ResponseEntity.ok(excuse);
-    }
+//    @GetMapping("/random")
+//    public ResponseEntity<ExcuseDTO> getRandomExcuse() {
+//        logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
+//
+//        ExcuseDTO excuse = excuseService.getRandomExcuse();
+//
+//        logger.info("Fetched random excuse with id {}", excuse.getId());
+//
+//        return ResponseEntity.ok(excuse);
+//    }
 
     @GetMapping("/category/{category}")
     public ResponseEntity<List<ExcuseDTO>> getExcusesByCategory(@PathVariable @NotBlank String category) {
