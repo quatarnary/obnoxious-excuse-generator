@@ -10,6 +10,7 @@ public class ErrorMessages {
     public static final String EXCUSE_NOT_FOUND = "Excuse with ID '%s' not found.";
 
     public static final String VALIDATION_ERROR = "Validation error";
+    public static final String LARGE_PAGEABLE_SIZE = "Page size must not exceed 100";
 
     public static final String UNEXPECTED_ERROR = "An unexpected error occurred.";
 }

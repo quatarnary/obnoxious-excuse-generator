@@ -19,6 +19,18 @@ public class ExcuseExceptionHandler {
 
     public static final Logger logger = LoggerFactory.getLogger(ExcuseExceptionHandler.class);
 
+    @ExceptionHandler(InvalidInputException.class)
+    public ResponseEntity<Object> handleInvalidInputException(InvalidInputException ex) {
+        logger.warn("Invalid input: {}", ex.getMessage());
+
+        ExceptionResponseBuilder response = ExceptionResponseBuilder.create(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationErrors(MethodArgumentNotValidException ex) {
         logger.warn("Validation failed: {}", ex.getMessage());
