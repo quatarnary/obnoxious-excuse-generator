@@ -8,11 +8,12 @@ import com.ilyasbugra.excusegenerator.exception.ExcuseNotFoundException;
 import com.ilyasbugra.excusegenerator.mapper.ExcuseMapper;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 @Service
 public class ExcuseService {
@@ -25,11 +26,9 @@ public class ExcuseService {
         this.random = random;
     }
 
-    public List<ExcuseDTO> getAllExcuses() {
-        return excuseRepository.findAll()
-                .stream()
-                .map(ExcuseMapper::toExcuseDTO)
-                .collect(Collectors.toList());
+    public Page<ExcuseDTO> getAllExcuses(Pageable pageable) {
+        return excuseRepository.findAll(pageable)
+                .map(ExcuseMapper::toExcuseDTO);
     }
 
     public ExcuseDTO getExcuseById(Long id) {
@@ -39,24 +38,28 @@ public class ExcuseService {
         return ExcuseMapper.toExcuseDTO(excuse);
     }
 
-    // TODO: CHANGE THE FREAKING excuseRepository.findAll(). we don't need to get all of the data then find the random numbered one. We can jsut get the random number and call findById(random_fucking_number)... This now takes 3 second to run!!!
+    // TODO: With paging this setup has to be more efficient but i still have my doubts on whether using findAll (even with paging) is a good approach...
+    // ... but 'till I find a better approach we are going with this... at least now we are not going to fetch 1.6M(the count at the time of writing this comment)
+    // data from the db..
     public ExcuseDTO getRandomExcuse() {
-        List<Excuse> allExcuses = excuseRepository.findAll();
-        if (allExcuses.isEmpty()) {
-            throw new ExcuseNotFoundException(0L);
-        }
-        return ExcuseMapper.toExcuseDTO(allExcuses.get(random.nextInt(allExcuses.size())));
+        final int pageSize = 1;
+        long count = excuseRepository.count();
+        if (count == 0) throw new ExcuseNotFoundException(0L);
+
+        // for the random we don't need the (count / pageSize) cast but this is the general usage and I want to get used seeing this...
+        int randomPage = random.nextInt((int) Math.ceil((double) count / pageSize));
+        Page<Excuse> page = excuseRepository.findAll(PageRequest.of(randomPage, pageSize));
+
+        if (!page.hasContent()) throw new ExcuseNotFoundException(0L);
+        return ExcuseMapper.toExcuseDTO(page.getContent().getFirst());
     }
 
-    public List<ExcuseDTO> getExcusesByCategory(String category) {
-        List<Excuse> allExcuses = excuseRepository.findByCategoryStartingWithIgnoreCase(category);
-        if (allExcuses.isEmpty()) {
-            throw new ExcuseCategoryNotFoundException(category);
-        }
+    public Page<ExcuseDTO> getExcusesByCategory(String category, Pageable pageable) {
+        Page<Excuse> excusePage = excuseRepository.findByCategoryStartingWithIgnoreCase(category, pageable);
 
-        return allExcuses.stream()
-                .map(ExcuseMapper::toExcuseDTO)
-                .collect(Collectors.toList());
+        if (excusePage.isEmpty()) throw new ExcuseCategoryNotFoundException(category);
+
+        return excusePage.map(ExcuseMapper::toExcuseDTO);
     }
 
     public ExcuseDTO createExcuse(CreateExcuseDTO createExcuseDTO) {

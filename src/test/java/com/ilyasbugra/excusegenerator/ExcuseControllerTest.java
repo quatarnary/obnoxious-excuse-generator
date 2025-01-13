@@ -12,6 +12,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -48,41 +51,74 @@ public class ExcuseControllerTest {
     }
 
     @Test
-    void testGetAllExcuses_ShouldReturn200() throws Exception {
-        List<ExcuseDTO> excuses = List.of(
-                ExcuseDTO.builder()
-                        .id(1L)
-                        .category("Work")
-                        .excuseMessage("My boss abducted me.")
-                        .build(),
-                ExcuseDTO.builder()
-                        .id(2L)
-                        .category("Family")
-                        .excuseMessage("My dog ate my homework.")
-                        .build()
+    void testGetAllExcuses_DefaultPage_ShouldReturn200() throws Exception {
+        Page<ExcuseDTO> excusePage = new PageImpl<>(
+                List.of(
+                        ExcuseDTO.builder()
+                                .id(1L)
+                                .category("Work")
+                                .excuseMessage("My boss abducted me.")
+                                .build(),
+                        ExcuseDTO.builder()
+                                .id(2L)
+                                .category("Family")
+                                .excuseMessage("My dog ate my homework.")
+                                .build()
+                )
         );
 
-        when(excuseService.getAllExcuses()).thenReturn(excuses);
+        when(excuseService.getAllExcuses(any(Pageable.class))).thenReturn(excusePage);
 
         mockMvc.perform(get("/api/v1/excuses"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(2))
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].category").value("Work"))
-                .andExpect(jsonPath("$[0].excuseMessage").value("My boss abducted me."))
-                .andExpect(jsonPath("$[1].id").value(2L))
-                .andExpect(jsonPath("$[1].category").value("Family"))
-                .andExpect(jsonPath("$[1].excuseMessage").value("My dog ate my homework."));
+                .andExpect(jsonPath("$.content.size()").value(2))
+                .andExpect(jsonPath("$.content[0].id").value(1L))
+                .andExpect(jsonPath("$.content[0].category").value("Work"))
+                .andExpect(jsonPath("$.content[0].excuseMessage").value("My boss abducted me."))
+                .andExpect(jsonPath("$.content[1].id").value(2L))
+                .andExpect(jsonPath("$.content[1].category").value("Family"))
+                .andExpect(jsonPath("$.content[1].excuseMessage").value("My dog ate my homework."));
     }
 
     @Test
-    void testGetAllExcuses_EmptyList_ShouldReturn200() throws Exception {
-        when(excuseService.getAllExcuses()).thenReturn(List.of()); // Empty list
+    void testGetAllExcuses_DefaultPage_EmptyList_ShouldReturn200() throws Exception {
+        when(excuseService.getAllExcuses(any(Pageable.class))).thenReturn(new PageImpl<>(List.of())); // Empty list
 
         mockMvc.perform(get("/api/v1/excuses"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(0)); // Expecting empty array
+                .andExpect(jsonPath("$.content.size()").value(0)); // Expecting empty array
+    }
+
+    @Test
+    void testGetExcusesByCategory_ValidCategory_ShouldReturn200() throws Exception {
+        String category = "Work";
+        Page<ExcuseDTO> excusePage = new PageImpl<>(
+                List.of(
+                        ExcuseDTO.builder()
+                                .id(1L)
+                                .category("Work")
+                                .excuseMessage("My boss abducted me.")
+                                .build(),
+                        ExcuseDTO.builder()
+                                .id(2L)
+                                .category("Work")
+                                .excuseMessage("I had to work late.")
+                                .build()
+                )
+        );
+
+        when(excuseService.getExcusesByCategory(eq(category), any(Pageable.class)))
+                .thenReturn(excusePage);
+
+        mockMvc.perform(get("/api/v1/excuses/category/Work"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()").value(2))
+                .andExpect(jsonPath("$.content[0].category").value("Work"))
+                .andExpect(jsonPath("$.content[0].excuseMessage").value("My boss abducted me."))
+                .andExpect(jsonPath("$.content[1].category").value("Work"))
+                .andExpect(jsonPath("$.content[1].excuseMessage").value("I had to work late."));
     }
 
     @Test

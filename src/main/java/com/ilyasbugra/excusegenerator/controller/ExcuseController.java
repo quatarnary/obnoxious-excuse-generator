@@ -3,17 +3,20 @@ package com.ilyasbugra.excusegenerator.controller;
 import com.ilyasbugra.excusegenerator.dto.CreateExcuseDTO;
 import com.ilyasbugra.excusegenerator.dto.ExcuseDTO;
 import com.ilyasbugra.excusegenerator.dto.UpdateExcuseDTO;
+import com.ilyasbugra.excusegenerator.exception.InvalidInputException;
 import com.ilyasbugra.excusegenerator.service.ExcuseService;
+import com.ilyasbugra.excusegenerator.util.ErrorMessages;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/excuses")
@@ -28,16 +31,18 @@ public class ExcuseController {
         this.excuseService = excuseService;
     }
 
-//    @GetMapping
-//    public ResponseEntity<List<ExcuseDTO>> getAllExcuses() {
-//        logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
-//
-//        List<ExcuseDTO> excuses = excuseService.getAllExcuses();
-//
-//        logger.info("Fetched {} excuses", excuses.size());
-//
-//        return ResponseEntity.ok(excuses);
-//    }
+    @GetMapping
+    public ResponseEntity<Page<ExcuseDTO>> getAllExcuses(Pageable pageable) {
+        logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
+
+        if (pageable.getPageSize() > 100) throw new InvalidInputException(ErrorMessages.LARGE_PAGEABLE_SIZE);
+
+        Page<ExcuseDTO> excuses = excuseService.getAllExcuses(pageable);
+
+        logger.info("Fetched {} excuses (page {} of {})", excuses.getContent().size(), excuses.getNumber(), excuses.getTotalPages());
+
+        return ResponseEntity.ok(excuses);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ExcuseDTO> getExcuseById(@PathVariable Long id) {
@@ -50,24 +55,30 @@ public class ExcuseController {
         return ResponseEntity.ok(excuse);
     }
 
-//    @GetMapping("/random")
-//    public ResponseEntity<ExcuseDTO> getRandomExcuse() {
-//        logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
-//
-//        ExcuseDTO excuse = excuseService.getRandomExcuse();
-//
-//        logger.info("Fetched random excuse with id {}", excuse.getId());
-//
-//        return ResponseEntity.ok(excuse);
-//    }
-
-    @GetMapping("/category/{category}")
-    public ResponseEntity<List<ExcuseDTO>> getExcusesByCategory(@PathVariable @NotBlank String category) {
+    @GetMapping("/random")
+    public ResponseEntity<ExcuseDTO> getRandomExcuse() {
         logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
 
-        List<ExcuseDTO> excuses = excuseService.getExcusesByCategory(category);
+        ExcuseDTO excuse = excuseService.getRandomExcuse();
 
-        logger.info("Fetched {} excuses by category {}", excuses.size(), category);
+        logger.info("Fetched random excuse with id {}", excuse.getId());
+
+        return ResponseEntity.ok(excuse);
+    }
+
+    @GetMapping("/category/{category}")
+    public ResponseEntity<Page<ExcuseDTO>> getExcusesByCategory(
+            @PathVariable @NotBlank String category,
+            Pageable pageable
+    ) {
+        logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
+
+        if (pageable.getPageSize() > 100) throw new InvalidInputException(ErrorMessages.LARGE_PAGEABLE_SIZE);
+
+        Page<ExcuseDTO> excuses = excuseService.getExcusesByCategory(category, pageable);
+
+        logger.info("Fetched {} excuses by category {} (page {} of {})",
+                excuses.getContent().size(), category, excuses.getNumber(), excuses.getTotalPages());
 
         return ResponseEntity.ok(excuses);
     }

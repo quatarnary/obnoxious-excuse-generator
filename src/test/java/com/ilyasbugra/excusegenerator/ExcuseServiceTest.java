@@ -15,6 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,12 +29,12 @@ import static org.mockito.Mockito.*;
 
 public class ExcuseServiceTest {
 
-    private static final Excuse excuseEntity1 = Excuse.builder()
+    private static final Excuse workExcuseEntity = Excuse.builder()
             .id(1L)
             .excuseMessage("I was abducted by aliens.")
             .category("Work")
             .build();
-    private static final Excuse excuseEntity2 = Excuse.builder()
+    private static final Excuse schoolExcuseEntity = Excuse.builder()
             .id(2L)
             .excuseMessage("My dog ate me.")
             .category("School")
@@ -47,24 +51,26 @@ public class ExcuseServiceTest {
 
     @Test
     public void testGetAllExcuses() {
-        List<Excuse> excuses = List.of(excuseEntity1, excuseEntity2);
-        when(excuseRepository.findAll()).thenReturn(excuses);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Excuse> excusePage = new PageImpl<>(List.of(workExcuseEntity, schoolExcuseEntity));
+        when(excuseRepository.findAll(any(Pageable.class)))
+                .thenReturn(excusePage);
 
-        List<ExcuseDTO> result = excuseService.getAllExcuses();
+        Page<ExcuseDTO> result = excuseService.getAllExcuses(pageable);
 
-        assertEquals(2, result.size());
-        verify(excuseRepository, times(1)).findAll();
+        assertEquals(2, result.getContent().size());
+        verify(excuseRepository, times(1)).findAll(pageable);
     }
 
     @Test
     public void testGetExcuseById() {
-        Excuse excuse = excuseEntity1;
+        Excuse excuse = workExcuseEntity;
         when(excuseRepository.findById(1L)).thenReturn(Optional.of(excuse));
 
         ExcuseDTO result = excuseService.getExcuseById(1L);
 
         assertNotNull(result);
-        assertEquals(excuseEntity1.getCategory(), result.getCategory());
+        assertEquals(workExcuseEntity.getCategory(), result.getCategory());
         verify(excuseRepository, times(1)).findById(1L);
     }
 
@@ -78,9 +84,10 @@ public class ExcuseServiceTest {
 
     @Test
     public void testGetRandomExcuse() {
-        List<Excuse> excuses = List.of(excuseEntity1, excuseEntity2);
-
-        when(excuseRepository.findAll()).thenReturn(excuses);
+        Pageable pageable = PageRequest.of(0, 1);
+        when(excuseRepository.count()).thenReturn(2L);
+        when(excuseRepository.findAll(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(schoolExcuseEntity)));
 
         Random mockRandom = mock(Random.class);
         when(mockRandom.nextInt(2)).thenReturn(0);
@@ -89,36 +96,40 @@ public class ExcuseServiceTest {
         ExcuseDTO result = mockExcuseServiceWithRandom.getRandomExcuse();
 
         assertNotNull(result);
-        assertEquals(excuses.getFirst().getCategory(), result.getCategory());
-        assertEquals(excuses.getFirst().getExcuseMessage(), result.getExcuseMessage());
+        assertEquals(schoolExcuseEntity.getCategory(), result.getCategory());
+        assertEquals(schoolExcuseEntity.getExcuseMessage(), result.getExcuseMessage());
 
-        verify(excuseRepository, times(1)).findAll();
+        verify(excuseRepository, times(1)).findAll(pageable);
     }
 
     @Test
     public void testGetExcusesByCategory() {
         String category = "Work";
-        List<Excuse> excuses = List.of(excuseEntity1, excuseEntity1);
-        when(excuseRepository.findByCategoryStartingWithIgnoreCase(category)).thenReturn(excuses);
+        Pageable pageable = PageRequest.of(0, 10);
+        when(excuseRepository.findByCategoryStartingWithIgnoreCase(category, pageable))
+                .thenReturn(new PageImpl<>(List.of(workExcuseEntity, workExcuseEntity)));
 
-        List<ExcuseDTO> result = excuseService.getExcusesByCategory(category);
+        Page<ExcuseDTO> result = excuseService.getExcusesByCategory(category, pageable);
 
-        assertEquals(2, result.size());
-        assertEquals(excuses.get(0).getCategory(), result.get(0).getCategory());
-        assertEquals(excuses.get(1).getCategory(), result.get(1).getCategory());
+        assertEquals(2, result.getContent().size());
+        assertEquals(workExcuseEntity.getCategory(), result.getContent().getFirst().getCategory());
 
-        verify(excuseRepository, times(1)).findByCategoryStartingWithIgnoreCase(category);
+        verify(excuseRepository, times(1)).findByCategoryStartingWithIgnoreCase(category, pageable);
     }
 
     @Test
     public void testGetExcusesByCategory_NotFound() {
         String category = "NonExistent";
+        Pageable pageable = PageRequest.of(0, 10);
 
-        Exception exception = assertThrows(ExcuseCategoryNotFoundException.class, () -> excuseService.getExcusesByCategory(category));
+        when(excuseRepository.findByCategoryStartingWithIgnoreCase(category, pageable))
+                .thenReturn(Page.empty());
+
+        Exception exception = assertThrows(ExcuseCategoryNotFoundException.class, () -> excuseService.getExcusesByCategory(category, pageable));
 
         assertEquals(String.format(ErrorMessages.CATEGORY_NOT_FOUND, category), exception.getMessage());
 
-        verify(excuseRepository, times(1)).findByCategoryStartingWithIgnoreCase(category);
+        verify(excuseRepository, times(1)).findByCategoryStartingWithIgnoreCase(category, pageable);
     }
 
     @Test
@@ -145,7 +156,7 @@ public class ExcuseServiceTest {
                 .category(newCategory)
                 .build();
 
-        Excuse excuse = excuseEntity1;
+        Excuse excuse = workExcuseEntity;
 
         when(excuseRepository.findById(id)).thenReturn(Optional.of(excuse));
         when(excuseRepository.save(excuse)).thenReturn(excuse);
