@@ -14,7 +14,8 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 @Table(name = "excuse", indexes = {
-        @Index(name = "idx_category", columnList = "category")
+        @Index(name = "idx_createdAt", columnList = "createdAt"),
+        @Index(name = "idx_category_createdAt", columnList = "category, createdAt")
 })
 public class Excuse {
 
