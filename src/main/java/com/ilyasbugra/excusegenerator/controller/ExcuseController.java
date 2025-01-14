@@ -66,9 +66,9 @@ public class ExcuseController {
         return ResponseEntity.ok(excuse);
     }
 
-    @GetMapping("/category/{category}")
+    @GetMapping("/category")
     public ResponseEntity<Page<ExcuseDTO>> getExcusesByCategory(
-            @PathVariable @NotBlank String category,
+            @RequestParam("category") @NotBlank String category,
             Pageable pageable
     ) {
         logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
