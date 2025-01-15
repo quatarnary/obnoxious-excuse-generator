@@ -20,22 +20,24 @@ public class ExcuseV2Service {
 
     private final ExcuseRepository excuseRepository;
     private final Random random;
+    private final ExcuseV2Mapper excuseV2Mapper;
 
-    public ExcuseV2Service(ExcuseRepository excuseRepository, Random random) {
+    public ExcuseV2Service(ExcuseRepository excuseRepository, Random random, ExcuseV2Mapper excuseV2Mapper) {
         this.excuseRepository = excuseRepository;
         this.random = random;
+        this.excuseV2Mapper = excuseV2Mapper;
     }
 
     public Page<ExcuseV2DTO> getAllExcuses(Pageable pageable) {
         return excuseRepository.findAll(pageable)
-                .map(ExcuseV2Mapper::toExcuseV2DTO);
+                .map(excuseV2Mapper::toExcuseV2DTO);
     }
 
     public ExcuseV2DTO getExcuseById(Long id) {
         Excuse excuse = excuseRepository.findById(id)
                 .orElseThrow(() -> new ExcuseNotFoundException(id));
 
-        return ExcuseV2Mapper.toExcuseV2DTO(excuse);
+        return excuseV2Mapper.toExcuseV2DTO(excuse);
     }
 
     // TODO: With paging this setup has to be more efficient but i still have my doubts on whether using findAll (even with paging) is a good approach...
@@ -51,7 +53,7 @@ public class ExcuseV2Service {
         Page<Excuse> page = excuseRepository.findAll(PageRequest.of(randomPage, pageSize));
 
         if (!page.hasContent()) throw new ExcuseNotFoundException(0L);
-        return ExcuseV2Mapper.toExcuseV2DTO(page.getContent().getFirst());
+        return excuseV2Mapper.toExcuseV2DTO(page.getContent().getFirst());
     }
 
     public Page<ExcuseV2DTO> getExcusesByCategory(String category, Pageable pageable) {
@@ -59,22 +61,22 @@ public class ExcuseV2Service {
 
         if (excusePage.isEmpty()) throw new ExcuseCategoryNotFoundException(category);
 
-        return excusePage.map(ExcuseV2Mapper::toExcuseV2DTO);
+        return excusePage.map(excuseV2Mapper::toExcuseV2DTO);
     }
 
     public ExcuseV2DTO createExcuse(CreateExcuseV2DTO createExcuseV2DTO) {
-        Excuse excuse = ExcuseV2Mapper.toExcuseV2(createExcuseV2DTO);
+        Excuse excuse = excuseV2Mapper.toExcuse(createExcuseV2DTO);
         Excuse savedExcuse = excuseRepository.save(excuse);
-        return ExcuseV2Mapper.toExcuseV2DTO(savedExcuse);
+        return excuseV2Mapper.toExcuseV2DTO(savedExcuse);
     }
 
     public ExcuseV2DTO updateExcuse(Long id, UpdateExcuseV2DTO updateExcuseV2DTO) {
         Excuse excuse = excuseRepository.findById(id)
                 .orElseThrow(() -> new ExcuseNotFoundException(id));
 
-        ExcuseV2Mapper.updateExcuseV2(updateExcuseV2DTO, excuse);
+        excuseV2Mapper.updateExcuseV2(updateExcuseV2DTO, excuse);
         Excuse updatedExcuse = excuseRepository.save(excuse);
-        return ExcuseV2Mapper.toExcuseV2DTO(updatedExcuse);
+        return excuseV2Mapper.toExcuseV2DTO(updatedExcuse);
     }
 
     public void deleteExcuse(Long id) {
