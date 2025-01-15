@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator;
+package com.ilyasbugra.excusegenerator.v1;
 
 import com.ilyasbugra.excusegenerator.exception.ExcuseCategoryNotFoundException;
 import com.ilyasbugra.excusegenerator.exception.ExcuseNotFoundException;

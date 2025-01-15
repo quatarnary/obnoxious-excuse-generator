@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator;
+package com.ilyasbugra.excusegenerator.v1;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ilyasbugra.excusegenerator.exception.ExcuseNotFoundException;
