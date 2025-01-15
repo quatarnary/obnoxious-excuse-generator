@@ -1,15 +1,15 @@
 package com.ilyasbugra.excusegenerator;
 
-import com.ilyasbugra.excusegenerator.dto.CreateExcuseDTO;
-import com.ilyasbugra.excusegenerator.dto.ExcuseDTO;
-import com.ilyasbugra.excusegenerator.dto.UpdateExcuseDTO;
 import com.ilyasbugra.excusegenerator.exception.ExcuseCategoryNotFoundException;
 import com.ilyasbugra.excusegenerator.exception.ExcuseNotFoundException;
-import com.ilyasbugra.excusegenerator.mapper.ExcuseMapper;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
-import com.ilyasbugra.excusegenerator.service.ExcuseService;
 import com.ilyasbugra.excusegenerator.util.ErrorMessages;
+import com.ilyasbugra.excusegenerator.v1.dto.CreateExcuseDTO;
+import com.ilyasbugra.excusegenerator.v1.dto.ExcuseDTO;
+import com.ilyasbugra.excusegenerator.v1.dto.UpdateExcuseDTO;
+import com.ilyasbugra.excusegenerator.v1.mapper.ExcuseMapper;
+import com.ilyasbugra.excusegenerator.v1.service.ExcuseService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

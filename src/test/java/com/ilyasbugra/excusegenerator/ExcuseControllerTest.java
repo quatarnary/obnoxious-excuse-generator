@@ -1,13 +1,13 @@
 package com.ilyasbugra.excusegenerator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ilyasbugra.excusegenerator.controller.ExcuseController;
-import com.ilyasbugra.excusegenerator.dto.CreateExcuseDTO;
-import com.ilyasbugra.excusegenerator.dto.ExcuseDTO;
-import com.ilyasbugra.excusegenerator.dto.UpdateExcuseDTO;
 import com.ilyasbugra.excusegenerator.exception.ExcuseNotFoundException;
-import com.ilyasbugra.excusegenerator.service.ExcuseService;
 import com.ilyasbugra.excusegenerator.util.ErrorMessages;
+import com.ilyasbugra.excusegenerator.v1.controller.ExcuseController;
+import com.ilyasbugra.excusegenerator.v1.dto.CreateExcuseDTO;
+import com.ilyasbugra.excusegenerator.v1.dto.ExcuseDTO;
+import com.ilyasbugra.excusegenerator.v1.dto.UpdateExcuseDTO;
+import com.ilyasbugra.excusegenerator.v1.service.ExcuseService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

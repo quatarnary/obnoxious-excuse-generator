@@ -1,11 +1,11 @@
-package com.ilyasbugra.excusegenerator.controller;
+package com.ilyasbugra.excusegenerator.v1.controller;
 
-import com.ilyasbugra.excusegenerator.dto.CreateExcuseDTO;
-import com.ilyasbugra.excusegenerator.dto.ExcuseDTO;
-import com.ilyasbugra.excusegenerator.dto.UpdateExcuseDTO;
 import com.ilyasbugra.excusegenerator.exception.InvalidInputException;
-import com.ilyasbugra.excusegenerator.service.ExcuseService;
 import com.ilyasbugra.excusegenerator.util.ErrorMessages;
+import com.ilyasbugra.excusegenerator.v1.dto.CreateExcuseDTO;
+import com.ilyasbugra.excusegenerator.v1.dto.ExcuseDTO;
+import com.ilyasbugra.excusegenerator.v1.dto.UpdateExcuseDTO;
+import com.ilyasbugra.excusegenerator.v1.service.ExcuseService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;

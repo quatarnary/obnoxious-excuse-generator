@@ -1,13 +1,13 @@
-package com.ilyasbugra.excusegenerator.service;
+package com.ilyasbugra.excusegenerator.v1.service;
 
-import com.ilyasbugra.excusegenerator.dto.CreateExcuseDTO;
-import com.ilyasbugra.excusegenerator.dto.ExcuseDTO;
-import com.ilyasbugra.excusegenerator.dto.UpdateExcuseDTO;
 import com.ilyasbugra.excusegenerator.exception.ExcuseCategoryNotFoundException;
 import com.ilyasbugra.excusegenerator.exception.ExcuseNotFoundException;
-import com.ilyasbugra.excusegenerator.mapper.ExcuseMapper;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
+import com.ilyasbugra.excusegenerator.v1.dto.CreateExcuseDTO;
+import com.ilyasbugra.excusegenerator.v1.dto.ExcuseDTO;
+import com.ilyasbugra.excusegenerator.v1.dto.UpdateExcuseDTO;
+import com.ilyasbugra.excusegenerator.v1.mapper.ExcuseMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

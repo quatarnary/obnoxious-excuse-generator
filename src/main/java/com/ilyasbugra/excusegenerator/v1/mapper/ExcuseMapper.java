@@ -1,9 +1,9 @@
-package com.ilyasbugra.excusegenerator.mapper;
+package com.ilyasbugra.excusegenerator.v1.mapper;
 
-import com.ilyasbugra.excusegenerator.dto.CreateExcuseDTO;
-import com.ilyasbugra.excusegenerator.dto.ExcuseDTO;
-import com.ilyasbugra.excusegenerator.dto.UpdateExcuseDTO;
 import com.ilyasbugra.excusegenerator.model.Excuse;
+import com.ilyasbugra.excusegenerator.v1.dto.CreateExcuseDTO;
+import com.ilyasbugra.excusegenerator.v1.dto.ExcuseDTO;
+import com.ilyasbugra.excusegenerator.v1.dto.UpdateExcuseDTO;
 
 public class ExcuseMapper {
 

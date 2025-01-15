@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator.dto;
+package com.ilyasbugra.excusegenerator.v1.dto;
 
 import com.ilyasbugra.excusegenerator.util.ErrorMessages;
 import jakarta.validation.constraints.NotBlank;

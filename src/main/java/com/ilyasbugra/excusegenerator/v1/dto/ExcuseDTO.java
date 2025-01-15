@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator.dto;
+package com.ilyasbugra.excusegenerator.v1.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
