@@ -1,0 +1,56 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1737128729678-0
+      author: quatarnary
+      changes:
+        - tagDatabase:
+            tag: user-table
+  - changeSet:
+      id: 1737128729678-1
+      author: quatarnary
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_users
+                  name: id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: username
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: password
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: user_role
+                  type: VARCHAR(255)
+            tableName: users
+  - changeSet:
+      id: 1737128729678-2
+      author: quatarnary
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: username
+            constraintName: uc_users_username
+            tableName: users
+  - changeSet:
+      id: 1737128729678-4
+      author: quatarnary
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropTable:
+            cascadeConstraints: true
+            tableName: user
+
+

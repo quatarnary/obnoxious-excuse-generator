@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1737117601943-1
+      author: quatarnary
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_user
+                  name: id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: username
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: password
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: user_role
+                  type: VARCHAR(255)
+            tableName: user
+      rollback:
+        - dropTable:
+            tableName: user
+  - changeSet:
+      id: 1737117601943-2
+      author: quatarnary
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: username
+            constraintName: uc_user_username
+            tableName: user
+      rollback:
+        - dropUniqueConstraint:
+            constraintName: uc_user_username
+            tableName: user
+
