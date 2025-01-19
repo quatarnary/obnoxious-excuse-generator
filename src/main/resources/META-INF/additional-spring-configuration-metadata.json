@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "description": "This is the jwt secret that I need to hide at all cost. So here I'm giving you the direct access to it."
+    }
+  ]
+}
