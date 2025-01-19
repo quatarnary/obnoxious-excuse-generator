@@ -25,6 +25,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable) // csrf: Cross-Site Request Forgery -> they say it is not needed because of the JWT!
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("/api/v2/users/sign-up").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/excuses").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/excuses/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/excuses").authenticated()
