@@ -73,16 +73,4 @@ public class ExcuseExceptionHandler {
 
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleGeneralError(Exception ex) {
-        logger.error("Unexpected error: {}", ex.getMessage(), ex);
-
-        ExceptionResponseBuilder response = ExceptionResponseBuilder.create(
-                        HttpStatus.INTERNAL_SERVER_ERROR,
-                        ErrorMessages.UNEXPECTED_ERROR)
-                .addExtras("errorDetails", ex.getMessage());
-
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
 }
