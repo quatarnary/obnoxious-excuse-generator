@@ -1,5 +1,6 @@
 package com.ilyasbugra.excusegenerator.v2.mapper;
 
+import com.ilyasbugra.excusegenerator.v2.dto.UserLoginResponseDTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UserSignUpRequestDTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UserSignUpResponseDTO;
 import com.ilyasbugra.excusegenerator.v2.model.User;
@@ -13,4 +14,6 @@ public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
     User toUser(UserSignUpRequestDTO userSignUpRequestDTO);
+
+    UserLoginResponseDTO toUserLoginResponseDTO(User user, String token);
 }

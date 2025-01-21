@@ -25,4 +25,16 @@ public class UserExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException ex) {
+        logger.warn(ex.getMessage());
+
+        ExceptionResponseBuilder response = ExceptionResponseBuilder.create(
+                HttpStatus.NOT_FOUND,
+                ex.getMessage()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
 }

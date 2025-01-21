@@ -1,6 +1,8 @@
 package com.ilyasbugra.excusegenerator.v2.controller;
 
 
+import com.ilyasbugra.excusegenerator.v2.dto.UserLoginRequestDTO;
+import com.ilyasbugra.excusegenerator.v2.dto.UserLoginResponseDTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UserSignUpRequestDTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UserSignUpResponseDTO;
 import com.ilyasbugra.excusegenerator.v2.service.UserService;
@@ -31,6 +33,16 @@ public class UserController {
         UserSignUpResponseDTO responseDTO = userService.signUp(request);
 
         logger.info("User '{}' successfully signed up", responseDTO.getUsername());
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserLoginResponseDTO> login(@Valid @RequestBody UserLoginRequestDTO request) {
+        logger.info("Login request: {}", request.getUsername());
+
+        UserLoginResponseDTO responseDTO = userService.login(request);
+
+        logger.info("User '{}' successfully logged in", responseDTO.getUsername());
         return ResponseEntity.ok(responseDTO);
     }
 }
