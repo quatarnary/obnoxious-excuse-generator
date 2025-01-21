@@ -45,20 +45,17 @@ public class UserService {
         logger.info("Hashing password for username '{}'", requestDTO.getUsername());
         String hashedPassword = passwordEncoder.encode(requestDTO.getPassword());
 
-        // TODO: I need to work on the mapper to fix this part.. but for now I just want to start working on login 😎
-        User user = User.builder()
-                .username(requestDTO.getUsername())
-                .password(hashedPassword)
-                .userRole(UserRole.REGULAR)
-                .build();
+        User user = userMapper.toUser(requestDTO, hashedPassword, UserRole.REGULAR);
 
+        logger.debug("Saving user:.. '{}'", requestDTO.getUsername());
         User savedUser = userRepository.save(user);
         logger.info("User '{}' saved with '{}' role.", savedUser.getUsername(), savedUser.getUserRole());
 
-        UserSignUpResponseDTO signUpResponseDTO = userMapper.toUserSignUpResponseDTO(savedUser);
-        signUpResponseDTO.setMessage("User successfully signed up with the '" + savedUser.getUserRole() + "' role.");
-
-        return signUpResponseDTO;
+        // the message may and will probably change with token, but for now just as a skelly we have message..
+        return userMapper.toUserSignUpResponseDTO(
+                savedUser,
+                "User successfully signed up with the '" + savedUser.getUserRole() + "' role."
+        );
     }
 
     public UserLoginResponseDTO login(UserLoginRequestDTO requestDTO) {
