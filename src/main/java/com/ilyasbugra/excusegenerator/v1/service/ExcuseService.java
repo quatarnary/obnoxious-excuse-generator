@@ -15,6 +15,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.Random;
 
+/**
+ * 🚨 Heads up, API consumers! ExcuseService v1 is excommunicado.
+ * Like a trusty old wand, it served its purpose but now bows to v2's superior magic. 🪄✨
+ * Still alive for backward compatibility... for now.
+ */
+@Deprecated(since = "v3", forRemoval = true)
 @Service
 public class ExcuseService {
 

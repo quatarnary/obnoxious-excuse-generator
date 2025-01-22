@@ -18,6 +18,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
+/**
+ * 🚨 Heads up, API consumers! ExcuseController v1 is excommunicado.
+ * It got no user logic, so it's living in the past.
+ * We're keeping it alive for backward compatibility (and for the nostalgia vibes, mostly for the nostalgia vibes).
+ * But hey, v2 is where the real magic happens! ✨
+ */
+@Deprecated(since = "v3", forRemoval = true)
 @RestController
 @RequestMapping("/api/v1/excuses")
 public class ExcuseController {
