@@ -70,7 +70,7 @@ public class UserService {
         }
 
         logger.info("Generating JWT spell for user: '{}'", user.getUsername());
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(user.getUsername(), user.getUserRole());
 
         return userMapper.toUserLoginResponseDTO(user, token);
     }

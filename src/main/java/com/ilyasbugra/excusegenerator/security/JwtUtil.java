@@ -1,5 +1,6 @@
 package com.ilyasbugra.excusegenerator.security;
 
+import com.ilyasbugra.excusegenerator.v2.model.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -22,8 +23,9 @@ public class JwtUtil {
         this.SIGNING_KEY = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String username, UserRole role) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);
         return createToken(claims, username);
     }
 
