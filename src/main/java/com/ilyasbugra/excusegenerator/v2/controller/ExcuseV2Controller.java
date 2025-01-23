@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -83,6 +84,7 @@ public class ExcuseV2Controller {
         return ResponseEntity.ok(excuses);
     }
 
+    @PreAuthorize("hasAnyAuthority('MOD', 'ADMIN')")
     @PostMapping
     public ResponseEntity<ExcuseV2DTO> createExcuse(@Valid @RequestBody CreateExcuseV2DTO createExcuseV2DTO) {
         logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
@@ -93,10 +95,11 @@ public class ExcuseV2Controller {
         logger.info("Created excuse {}", excuse);
 
         return ResponseEntity
-                .created(URI.create("/api/v1/excuses/" + excuse.getId()))
+                .created(URI.create("/api/v2/excuses/" + excuse.getId()))
                 .body(excuse);
     }
 
+    @PreAuthorize("hasAnyAuthority('MOD', 'ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ExcuseV2DTO> updateExcuse(@PathVariable Long id, @Valid @RequestBody UpdateExcuseV2DTO updateExcuseV2DTO) {
         logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
@@ -109,6 +112,7 @@ public class ExcuseV2Controller {
         return ResponseEntity.ok(excuse);
     }
 
+    @PreAuthorize("hasAnyAuthority('MOD', 'ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExcuse(@PathVariable Long id) {
         logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
