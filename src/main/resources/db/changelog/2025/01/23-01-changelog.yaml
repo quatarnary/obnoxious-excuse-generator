@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: tag-before-renaming-excuse
+      author: quatarnary
+      changes:
+        - tagDatabase:
+            tag: before-renaming-excuse-to-excuses
+  - changeSet:
+      id: rename-excuse-to-excuses
+      author: quatarnary
+      changes:
+        - renameTable:
+            oldTableName: excuse
+            newTableName: excuses
+      rollback:
+        - renameTable:
+            oldTableName: excuses
+            newTableName: excuse
+  - changeSet:
+      id: tag-after-renaming-excuse
+      author: quatarnary
+      changes:
+        - tagDatabase:
+            tag: after-renaming-excuse-to-excuses

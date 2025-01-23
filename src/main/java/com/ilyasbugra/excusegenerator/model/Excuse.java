@@ -13,7 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "excuse", indexes = {
+@Table(name = "excuses", indexes = {
         @Index(name = "idx_createdAt", columnList = "createdAt"),
         @Index(name = "idx_category_createdAt", columnList = "category, createdAt")
 })
