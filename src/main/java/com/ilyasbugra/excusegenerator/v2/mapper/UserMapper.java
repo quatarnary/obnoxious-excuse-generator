@@ -14,6 +14,7 @@ public interface UserMapper {
     UserSignUpResponseDTO toUserSignUpResponseDTO(User user, String message);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "password", source = "password")
     User toUser(UserSignUpRequestDTO userSignUpRequestDTO, String password, UserRole userRole);
 
     UserLoginResponseDTO toUserLoginResponseDTO(User user, String token);
