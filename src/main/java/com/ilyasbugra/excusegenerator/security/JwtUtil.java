@@ -37,8 +37,8 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String extractUsername(String token) {
-        return extractClaims(token, Claims::getSubject);
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        return extractClaims(token, claimsResolver);
     }
 
     // Helpers

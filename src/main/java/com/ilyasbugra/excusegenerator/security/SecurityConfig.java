@@ -28,9 +28,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v2/users/sign-up").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/excuses").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/excuses/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/excuses").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/excuses/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/excuses/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/excuses").denyAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/excuses/**").denyAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/excuses/**").denyAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
