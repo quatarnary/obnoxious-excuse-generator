@@ -1,0 +1,49 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-created-by-column-because-why-not
+      author: quatarnary
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: created_by
+                  type: UUID
+            tableName: excuses
+  - changeSet:
+      id: assign-existing-excuses-to-admin
+      author: quatarnary
+      changes:
+        - update:
+            tableName: excuses
+            columns:
+              - column:
+                  name: created_by
+                  value: "e91e8295-557a-4fd7-8e91-43c1fd9e5e8e"
+            where: "created_by IS NULL"
+  - changeSet:
+      id: make-created-by-not-null-or-else
+      author: quatarnary
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: created_by
+            tableName: excuses
+  - changeSet:
+      id: fk-to-users-so-they-know-their-excuses
+      author: quatarnary
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: created_by
+            baseTableName: excuses
+            constraintName: FK_EXCUSES_ON_CREATED_BY
+            referencedColumnNames: id
+            referencedTableName: users
+  - changeSet:
+      id: add-tag-so-we-remember-this-moment
+      author: quatarnary
+      changes:
+        - tagDatabase:
+            tag: created_by_added_to_excuses
+

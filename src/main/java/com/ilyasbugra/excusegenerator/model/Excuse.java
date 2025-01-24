@@ -1,5 +1,6 @@
 package com.ilyasbugra.excusegenerator.model;
 
+import com.ilyasbugra.excusegenerator.v2.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,6 +35,10 @@ public class Excuse {
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = false)
+    private User createdBy;
 
     @PrePersist
     protected void onCreate() {
