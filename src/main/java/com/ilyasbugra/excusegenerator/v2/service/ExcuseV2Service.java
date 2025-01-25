@@ -148,9 +148,34 @@ public class ExcuseV2Service {
         return excuseV2Mapper.toExcuseV2DTO(updatedExcuse);
     }
 
+    // Yes I'm just doing copy-paste and I know it is wrong but this will make also the delete work as intendedish for now
+    // the next step is to refactor all of these things, so just bare with me for a sec here
+    // t-25-jan-25-21:53
     public void deleteExcuse(Long id) {
-        if (!excuseRepository.existsById(id)) {
-            throw new ExcuseNotFoundException(id);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getName() == null) {
+            logger.error("Authentication is null or empty: {}", authentication != null ? authentication.getName() : "auth is null");
+            throw new IllegalStateException("Authentication is null or empty");
+        }
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> {
+                    logger.error("Username {} not found", username);
+                    return new UserNotFoundException(username);
+                });
+
+        if (user.getUserRole() == UserRole.REGULAR) {
+            logger.error("User '{}' is regular user", username);
+        }
+
+        Excuse excuse = excuseRepository.findById(id)
+                .orElseThrow(() -> new ExcuseNotFoundException(id));
+
+        if (user.getUserRole() == UserRole.MOD
+                && !excuse.getCreatedBy().getId().equals(user.getId())) {
+            logger.debug("User '{}' tried to delete with role '{}'", user.getUsername(), user.getUserRole());
+            throw new UserNotAuthorized(user.getUsername());
         }
 
         excuseRepository.deleteById(id);
