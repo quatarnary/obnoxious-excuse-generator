@@ -40,6 +40,10 @@ public class Excuse {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "updated_by")
+    private User updatedBy;
+
     @PrePersist
     protected void onCreate() {
         Date now = new Date();

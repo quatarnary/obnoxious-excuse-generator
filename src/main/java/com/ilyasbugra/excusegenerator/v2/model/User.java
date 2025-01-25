@@ -35,4 +35,7 @@ public class User {
 
     @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Excuse> excuses = new ArrayList<>();
+
+    @OneToMany(mappedBy = "updatedBy")
+    private List<Excuse> updatedExcuses = new ArrayList<>();
 }
