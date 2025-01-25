@@ -8,4 +8,5 @@ public class UserErrorMessages {
     public static final String USER_NOT_FOUND = "User '%s' does not exist in the excuse realm. Try again or sign up!";
     public static final String INVALID_CREDENTIALS = "Credential validation magic failed. Try again or sign up!";
 
+    public static final String USER_NOT_AUTHORIZED = "User '%s' does not have authority.";
 }

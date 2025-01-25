@@ -13,6 +13,18 @@ public class UserExceptionHandler {
 
     public static final Logger logger = LoggerFactory.getLogger(UserExceptionHandler.class);
 
+    @ExceptionHandler(UserNotAuthorized.class)
+    public ResponseEntity<ExceptionResponseBuilder> handleUserNotAuthorized(UserNotAuthorized ex) {
+        logger.warn(ex.getMessage());
+
+        ExceptionResponseBuilder response = ExceptionResponseBuilder.create(
+                HttpStatus.FORBIDDEN,
+                ex.getMessage()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(UsernameAlreadyTakenException.class)
     public ResponseEntity<Object> handleUsernameAlreadyTakenException(UsernameAlreadyTakenException ex) {
         logger.warn(ex.getMessage());

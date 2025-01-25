@@ -2,6 +2,7 @@ package com.ilyasbugra.excusegenerator.v2.service;
 
 import com.ilyasbugra.excusegenerator.exception.ExcuseCategoryNotFoundException;
 import com.ilyasbugra.excusegenerator.exception.ExcuseNotFoundException;
+import com.ilyasbugra.excusegenerator.exception.UserNotAuthorized;
 import com.ilyasbugra.excusegenerator.exception.UserNotFoundException;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
@@ -10,6 +11,7 @@ import com.ilyasbugra.excusegenerator.v2.dto.ExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UpdateExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.mapper.ExcuseV2Mapper;
 import com.ilyasbugra.excusegenerator.v2.model.User;
+import com.ilyasbugra.excusegenerator.v2.model.UserRole;
 import com.ilyasbugra.excusegenerator.v2.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,11 +99,52 @@ public class ExcuseV2Service {
     }
 
     public ExcuseV2DTO updateExcuse(Long id, UpdateExcuseV2DTO updateExcuseV2DTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getName() == null) {
+            logger.error("Authentication is null or empty: {}", authentication != null ? authentication.getName() : "auth is null");
+            throw new IllegalStateException("Authentication is null or empty");
+        }
+        String username = authentication.getName();
+
+        // I'm questioning about whether we should get the user here, or
+        // can we just use the username??
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> {
+                    logger.error("Username {} not found", username);
+                    return new UserNotFoundException(username);
+                });
+
+        if (user.getUserRole() == UserRole.REGULAR) {
+            logger.error("User '{}' is regular user", username);
+        }
+
         Excuse excuse = excuseRepository.findById(id)
                 .orElseThrow(() -> new ExcuseNotFoundException(id));
 
+        if (user.getUserRole() == UserRole.MOD
+                && !excuse.getCreatedBy().getId().equals(user.getId())) {
+            logger.debug("User '{}' tried to update with role '{}'", user.getUsername(), user.getUserRole());
+            throw new UserNotAuthorized(user.getUsername());
+        }
+
+        // TODO: how did I thought that mapper returning something for one method and not returning anything would be good
+        // It really happened, the thing people say about you know what your code is doing now but even you are not going
+        // remember what is doing in the future... I was just looking at the line thinking that how did update method was working
+        // T-earlier that what I wrote at the end lol
+        // I'm from few hours future and the more I look at how this mapper is working the more problem I'm seeing
+        // for the sake of my sanity as soon as the update logic ends I'll just change the mapper..
+        // T-25-Jan-2025-19:41
+        // God why! WHYYYYYY!
+        // T-25-jan-2025-21:47
         excuseV2Mapper.updateExcuseV2(updateExcuseV2DTO, excuse);
+        // anyway I was already going to change the mapper to also set the updatedBy so I'll fix it when I'm refactoring that part
+        excuse.setUpdatedBy(user);
+        logger.debug("Updating the excuse to: '{}'", excuse.getExcuseMessage());
+
         Excuse updatedExcuse = excuseRepository.save(excuse);
+        logger.debug("User: '{}' with role: {} updated the excuse with id: '{}'", user.getUsername(), user.getUserRole(), updatedExcuse.getId());
+        logger.debug("Excuse updated: {}", updatedExcuse.getId());
+
         return excuseV2Mapper.toExcuseV2DTO(updatedExcuse);
     }
 
