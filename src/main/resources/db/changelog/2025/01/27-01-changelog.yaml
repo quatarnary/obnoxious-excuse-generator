@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: tag-before-approve-changes
+      author: quatarnary
+      changes:
+        - tagDatabase:
+            tag: before_adding_the_approved_by_column
+  - changeSet:
+      id: add-column-approved_by
+      author: quatarnary
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: approved_by
+                  type: UUID
+            tableName: excuses
+  - changeSet:
+      id: add-fk-constraint-to-approved_by
+      author: quatarnary
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: approved_by
+            baseTableName: excuses
+            constraintName: FK_EXCUSES_ON_APPROVED_BY
+            referencedColumnNames: id
+            referencedTableName: users
+

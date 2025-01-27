@@ -38,4 +38,7 @@ public class User {
 
     @OneToMany(mappedBy = "updatedBy")
     private List<Excuse> updatedExcuses = new ArrayList<>();
+
+    @OneToMany(mappedBy = "approvedBy")
+    private List<Excuse> approvedExcuses = new ArrayList<>();
 }
