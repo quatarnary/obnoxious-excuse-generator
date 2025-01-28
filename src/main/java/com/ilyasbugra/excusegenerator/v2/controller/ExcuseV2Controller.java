@@ -124,4 +124,19 @@ public class ExcuseV2Controller {
 
         return ResponseEntity.noContent().build();
     }
+
+    // I'm going to refactor this part and maybe collect all the admin related logic to its own endpoint
+    // so bare with me for a while here.. t-28-jan-2025
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PostMapping("/admin/{id}")
+    public ResponseEntity<ExcuseV2DTO> approveExcuse(@PathVariable Long id) {
+        logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
+        logger.info("Approving excuse with id {}", id);
+
+        ExcuseV2DTO excuse = excuseV2Service.approveExcuse(id);
+
+        logger.info("Approved excuse with id {}", id);
+
+        return ResponseEntity.ok(excuse);
+    }
 }

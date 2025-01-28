@@ -180,4 +180,44 @@ public class ExcuseV2Service {
 
         excuseRepository.deleteById(id);
     }
+
+    // Yes another copy-paste
+    // Yes I'll refactor after this
+    // No, I'm not trying to delay it
+    // I want to keep the commits organized
+    // There is no way I'm going to overlook this novel like comments
+    // I mean no way, right? right?
+    //  t-28-jan-2025
+    // approveExcuse confirmation
+    // it is working but currently if an admin approves an already approved excuse, it overwrites it
+    // we should prevent that so that we can do one less write operation...
+    public ExcuseV2DTO approveExcuse(Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getName() == null) {
+            logger.error("Authentication is null or empty: {}", authentication != null ? authentication.getName() : "auth is null");
+            throw new IllegalStateException("Authentication is null or empty");
+        }
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> {
+                    logger.error("Username {} not found", username);
+                    return new UserNotFoundException(username);
+                });
+
+        if (user.getUserRole() != UserRole.ADMIN) {
+            logger.error("User '{}' is not an admin user", username);
+        }
+
+        Excuse excuse = excuseRepository.findById(id)
+                .orElseThrow(() -> new ExcuseNotFoundException(id));
+
+        excuse.setApprovedBy(user);
+
+        Excuse approvedExcuse = excuseRepository.save(excuse);
+        logger.debug("User: '{}' with role: {} updated the excuse with id: '{}'", user.getUsername(), user.getUserRole(), approvedExcuse.getId());
+        logger.debug("Excuse updated: {}", approvedExcuse.getId());
+
+        return excuseV2Mapper.toExcuseV2DTO(approvedExcuse);
+    }
 }
