@@ -30,7 +30,14 @@ public class JwtUtil {
     }
 
     public boolean validateToken(String token) {
-        return !isTokenExpired(token);
+        if (token == null || token.trim().isEmpty()) {
+            return false;
+        }
+        try {
+            return !isTokenExpired(token);
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
+            return false;
+        }
     }
 
     public boolean isTokenExpired(String token) {
