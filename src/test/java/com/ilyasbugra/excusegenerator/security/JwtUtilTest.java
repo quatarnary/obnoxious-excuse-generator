@@ -53,6 +53,29 @@ public class JwtUtilTest {
         assertTrue(jwtUtil.isTokenExpired(expiredToken));
     }
 
+    @Test
+    public void testInvalidToken() {
+        assertFalse(jwtUtil.validateToken("invalid-token"));
+    }
+
+    @Test
+    public void testTamperedToken() {
+        String token = jwtUtil.generateToken(TEST_USERNAME, TEST_ROLE);
+        String tamperedToken = token + "tampered";
+
+        assertFalse(jwtUtil.validateToken(tamperedToken));
+    }
+
+    @Test
+    public void testNullToken() {
+        assertFalse(jwtUtil.validateToken(null));
+    }
+
+    @Test
+    public void testEmptyToken() {
+        assertFalse(jwtUtil.validateToken(""));
+    }
+
     // Helpers
     private String generateExpiredToken() {
         return Jwts.builder()
