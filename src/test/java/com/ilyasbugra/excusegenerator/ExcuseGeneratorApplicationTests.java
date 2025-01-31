@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator.v1;
+package com.ilyasbugra.excusegenerator;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
