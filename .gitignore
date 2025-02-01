@@ -31,3 +31,23 @@ build/
 
 ### VS Code ###
 .vscode/
+.DS_Store
+src/.DS_Store
+src/main/.DS_Store
+src/main/java/.DS_Store
+src/main/java/com/.DS_Store
+src/main/java/com/ilyasbugra/.DS_Store
+src/main/java/com/ilyasbugra/excusegenerator/.DS_Store
+src/main/java/com/ilyasbugra/excusegenerator/v1/.DS_Store
+src/main/java/com/ilyasbugra/excusegenerator/v2/.DS_Store
+src/main/resources/.DS_Store
+src/main/resources/db/.DS_Store
+src/main/resources/db/changelog/.DS_Store
+src/main/resources/db/changelog/2025/.DS_Store
+src/test/.DS_Store
+src/test/java/.DS_Store
+src/test/java/com/.DS_Store
+src/test/java/com/ilyasbugra/.DS_Store
+src/test/java/com/ilyasbugra/excusegenerator/.DS_Store
+src/test/java/com/ilyasbugra/excusegenerator/v1/.DS_Store
+src/test/java/com/ilyasbugra/excusegenerator/v2/.DS_Store
