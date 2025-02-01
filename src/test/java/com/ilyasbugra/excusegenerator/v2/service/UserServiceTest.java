@@ -1,6 +1,9 @@
 package com.ilyasbugra.excusegenerator.v2.service;
 
 import com.ilyasbugra.excusegenerator.exception.UsernameAlreadyTakenException;
+import com.ilyasbugra.excusegenerator.security.JwtUtil;
+import com.ilyasbugra.excusegenerator.v2.dto.UserLoginRequestDTO;
+import com.ilyasbugra.excusegenerator.v2.dto.UserLoginResponseDTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UserSignUpRequestDTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UserSignUpResponseDTO;
 import com.ilyasbugra.excusegenerator.v2.mapper.UserMapper;
@@ -34,6 +37,8 @@ public class UserServiceTest {
     private static final String SUCCESSFUL_REGULAR_SIGNUP_MESSAGE = "User successfully signed up with the '" + UserRole.REGULAR + "' role.";
     private static final UserRole REGULAR_ROLE = UserRole.REGULAR;
 
+    private static final String VALID_JWT_TOKEN = "valid-jwt-token";
+
     @Mock
     private UserRepository userRepository;
 
@@ -42,6 +47,9 @@ public class UserServiceTest {
 
     @Mock
     private UserMapper userMapper;
+
+    @Mock
+    private JwtUtil jwtUtil;
 
     @InjectMocks
     private UserService userService;
@@ -102,5 +110,38 @@ public class UserServiceTest {
         assertThrows(UsernameAlreadyTakenException.class, () -> userService.signUp(requestDTO));
 
         verify(userRepository).findByUsername(EXISTING_USERNAME);
+    }
+
+    @Test
+    public void testLoginUser() {
+        UserLoginRequestDTO requestDTO = UserLoginRequestDTO.builder()
+                .username(EXISTING_USERNAME)
+                .password(RAW_PASSWORD)
+                .build();
+        User existingUser = User.builder()
+                .id(UUID.randomUUID())
+                .username(EXISTING_USERNAME)
+                .password(ENCODED_PASSWORD)
+                .userRole(REGULAR_ROLE)
+                .build();
+        UserLoginResponseDTO responseDTO = UserLoginResponseDTO.builder()
+                .username(EXISTING_USERNAME)
+                .token(VALID_JWT_TOKEN)
+                .build();
+
+        when(userRepository.findByUsername(EXISTING_USERNAME)).thenReturn(Optional.of(existingUser));
+        when(passwordEncoder.matches(RAW_PASSWORD, existingUser.getPassword())).thenReturn(true);
+        when(jwtUtil.generateToken(existingUser.getUsername(), existingUser.getUserRole())).thenReturn(VALID_JWT_TOKEN);
+        when(userMapper.toUserLoginResponseDTO(existingUser, VALID_JWT_TOKEN)).thenReturn(responseDTO);
+
+        UserLoginResponseDTO userLoginResponseDTO = userService.login(requestDTO);
+
+        assertNotNull(userLoginResponseDTO);
+        assertEquals(EXISTING_USERNAME, userLoginResponseDTO.getUsername());
+        assertEquals(VALID_JWT_TOKEN, userLoginResponseDTO.getToken());
+
+        verify(userRepository).findByUsername(EXISTING_USERNAME);
+        verify(passwordEncoder).matches(RAW_PASSWORD, existingUser.getPassword());
+        verify(jwtUtil).generateToken(existingUser.getUsername(), existingUser.getUserRole());
     }
 }
