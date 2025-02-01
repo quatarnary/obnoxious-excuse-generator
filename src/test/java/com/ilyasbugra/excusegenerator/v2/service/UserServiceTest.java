@@ -27,6 +27,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
+    private static final String NEW_USERNAME = "new-user";
+    private static final String RAW_PASSWORD = "raw-password";
+    private static final String ENCODED_PASSWORD = "encoded-password";
+    private static final String SUCCESSFUL_REGULAR_SIGNUP_MESSAGE = "User successfully signed up with the '" + UserRole.REGULAR + "' role.";
+    private static final UserRole REGULAR_ROLE = UserRole.REGULAR;
+
     @Mock
     private UserRepository userRepository;
 
@@ -42,34 +48,34 @@ public class UserServiceTest {
     @Test
     public void testCreateUser() {
         UserSignUpRequestDTO requestDTO = UserSignUpRequestDTO.builder()
-                .username("new-user")
-                .password("raw-password")
+                .username(NEW_USERNAME)
+                .password(RAW_PASSWORD)
                 .build();
         User mockUser = User.builder()
                 .id(UUID.randomUUID())
-                .username("new-user")
-                .password("encoded-password")
-                .userRole(UserRole.REGULAR)
+                .username(NEW_USERNAME)
+                .password(ENCODED_PASSWORD)
+                .userRole(REGULAR_ROLE)
                 .excuses(new ArrayList<>())
                 .updatedExcuses(new ArrayList<>())
                 .approvedExcuses(new ArrayList<>())
                 .build();
         UserSignUpResponseDTO responseDTO = UserSignUpResponseDTO.builder()
-                .username("new-user")
-                .message("User successfully signed up with the '" + UserRole.REGULAR + "' role.")
+                .username(NEW_USERNAME)
+                .message(SUCCESSFUL_REGULAR_SIGNUP_MESSAGE)
                 .build();
 
-        when(userRepository.findByUsername("new-user")).thenReturn(Optional.empty());
-        when(passwordEncoder.encode("raw-password")).thenReturn("encoded-password");
-        when(userMapper.toUser(requestDTO, "encoded-password", UserRole.REGULAR)).thenReturn(mockUser);
+        when(userRepository.findByUsername(NEW_USERNAME)).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(RAW_PASSWORD)).thenReturn(ENCODED_PASSWORD);
+        when(userMapper.toUser(requestDTO, ENCODED_PASSWORD, REGULAR_ROLE)).thenReturn(mockUser);
         when(userRepository.save(any(User.class))).thenReturn(mockUser);
         when(userMapper.toUserSignUpResponseDTO(any(User.class), anyString())).thenReturn(responseDTO);
 
         UserSignUpResponseDTO userSignUpResponseDTO = userService.signUp(requestDTO);
 
         assertNotNull(userSignUpResponseDTO);
-        assertEquals("new-user", userSignUpResponseDTO.getUsername());
-        assertEquals("User successfully signed up with the '" + UserRole.REGULAR + "' role.", userSignUpResponseDTO.getMessage());
+        assertEquals(NEW_USERNAME, userSignUpResponseDTO.getUsername());
+        assertEquals(SUCCESSFUL_REGULAR_SIGNUP_MESSAGE, userSignUpResponseDTO.getMessage());
 
         verify(userRepository).save(any(User.class));
     }
