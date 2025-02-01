@@ -1,5 +1,6 @@
 package com.ilyasbugra.excusegenerator.v2.service;
 
+import com.ilyasbugra.excusegenerator.exception.UsernameAlreadyTakenException;
 import com.ilyasbugra.excusegenerator.v2.dto.UserSignUpRequestDTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UserSignUpResponseDTO;
 import com.ilyasbugra.excusegenerator.v2.mapper.UserMapper;
@@ -17,8 +18,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 public class UserServiceTest {
 
     private static final String NEW_USERNAME = "new-user";
+    private static final String EXISTING_USERNAME = "existing-user";
     private static final String RAW_PASSWORD = "raw-password";
     private static final String ENCODED_PASSWORD = "encoded-password";
     private static final String SUCCESSFUL_REGULAR_SIGNUP_MESSAGE = "User successfully signed up with the '" + UserRole.REGULAR + "' role.";
@@ -78,5 +79,28 @@ public class UserServiceTest {
         assertEquals(SUCCESSFUL_REGULAR_SIGNUP_MESSAGE, userSignUpResponseDTO.getMessage());
 
         verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    public void testCreateUser_UsernameAlreadyTaken() {
+        UserSignUpRequestDTO requestDTO = UserSignUpRequestDTO.builder()
+                .username(EXISTING_USERNAME)
+                .password(RAW_PASSWORD)
+                .build();
+        User existingUser = User.builder()
+                .id(UUID.randomUUID())
+                .username(EXISTING_USERNAME)
+                .password(ENCODED_PASSWORD)
+                .userRole(REGULAR_ROLE)
+                .excuses(new ArrayList<>())
+                .updatedExcuses(new ArrayList<>())
+                .approvedExcuses(new ArrayList<>())
+                .build();
+
+        when(userRepository.findByUsername(EXISTING_USERNAME)).thenReturn(Optional.of(existingUser));
+
+        assertThrows(UsernameAlreadyTakenException.class, () -> userService.signUp(requestDTO));
+
+        verify(userRepository).findByUsername(EXISTING_USERNAME);
     }
 }
