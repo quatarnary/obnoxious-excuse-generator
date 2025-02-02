@@ -1,6 +1,7 @@
 package com.ilyasbugra.excusegenerator.v2.service;
 
 import com.ilyasbugra.excusegenerator.exception.InvalidInputException;
+import com.ilyasbugra.excusegenerator.exception.UserNotFoundException;
 import com.ilyasbugra.excusegenerator.exception.UsernameAlreadyTakenException;
 import com.ilyasbugra.excusegenerator.security.JwtUtil;
 import com.ilyasbugra.excusegenerator.v2.dto.UserLoginRequestDTO;
@@ -33,8 +34,10 @@ public class UserServiceTest {
 
     private static final String NEW_USERNAME = "new-user";
     private static final String EXISTING_USERNAME = "existing-user";
+    private static final String NON_EXISTING_USERNAME = "ghost-user";
     private static final String RAW_PASSWORD = "raw-password";
     private static final String WRONG_PASSWORD = "wrong-password";
+    private static final String NON_EXISTING_PASSWORD = "ghost-password";
     private static final String ENCODED_PASSWORD = "encoded-password";
     private static final String SUCCESSFUL_REGULAR_SIGNUP_MESSAGE = "User successfully signed up with the '" + UserRole.REGULAR + "' role.";
     private static final UserRole REGULAR_ROLE = UserRole.REGULAR;
@@ -173,5 +176,19 @@ public class UserServiceTest {
 
         verify(userRepository).findByUsername(EXISTING_USERNAME);
         verify(passwordEncoder).matches(WRONG_PASSWORD, existingUser.getPassword());
+    }
+
+    @Test
+    public void testLoginUser_NonExistentUser() {
+        UserLoginRequestDTO requestDTO = UserLoginRequestDTO.builder()
+                .username(NON_EXISTING_USERNAME)
+                .password(NON_EXISTING_PASSWORD)
+                .build();
+
+        when(userRepository.findByUsername(NON_EXISTING_USERNAME)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.login(requestDTO));
+
+        verify(userRepository).findByUsername(NON_EXISTING_USERNAME);
     }
 }
