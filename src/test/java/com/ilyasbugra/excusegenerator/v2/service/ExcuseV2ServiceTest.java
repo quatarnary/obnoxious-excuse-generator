@@ -17,10 +17,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -85,6 +82,28 @@ public class ExcuseV2ServiceTest {
 
         verify(excuseRepository).findAll(PAGEABLE_DEFAULT);
         verify(excuseV2Mapper, times(2)).toExcuseV2DTO(any(Excuse.class));
+    }
+
+    @Test
+    public void testGetExcuseById() {
+        // Arrange
+        Excuse excuse = createExcuses().getFirst();
+        ExcuseV2DTO excuseV2DTO = createExcuseV2DTOs(List.of(excuse)).getFirst();
+
+        when(excuseRepository.findById(eq(excuse.getId())))
+                .thenReturn(Optional.of(excuse));
+        when(excuseV2Mapper.toExcuseV2DTO(any(Excuse.class)))
+                .thenReturn(excuseV2DTO);
+
+        // Act
+        ExcuseV2DTO result = excuseV2Service.getExcuseById(excuse.getId());
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(excuse.getExcuseMessage(), result.getExcuseMessage());
+
+        verify(excuseRepository).findById(excuse.getId());
+        verify(excuseV2Mapper, times(1)).toExcuseV2DTO(any(Excuse.class));
     }
 
     // 🔹 Helper Methods 🔹
