@@ -1,5 +1,6 @@
 package com.ilyasbugra.excusegenerator.v2.service;
 
+import com.ilyasbugra.excusegenerator.exception.InvalidInputException;
 import com.ilyasbugra.excusegenerator.exception.UsernameAlreadyTakenException;
 import com.ilyasbugra.excusegenerator.security.JwtUtil;
 import com.ilyasbugra.excusegenerator.v2.dto.UserLoginRequestDTO;
@@ -33,6 +34,7 @@ public class UserServiceTest {
     private static final String NEW_USERNAME = "new-user";
     private static final String EXISTING_USERNAME = "existing-user";
     private static final String RAW_PASSWORD = "raw-password";
+    private static final String WRONG_PASSWORD = "wrong-password";
     private static final String ENCODED_PASSWORD = "encoded-password";
     private static final String SUCCESSFUL_REGULAR_SIGNUP_MESSAGE = "User successfully signed up with the '" + UserRole.REGULAR + "' role.";
     private static final UserRole REGULAR_ROLE = UserRole.REGULAR;
@@ -143,5 +145,33 @@ public class UserServiceTest {
         verify(userRepository).findByUsername(EXISTING_USERNAME);
         verify(passwordEncoder).matches(RAW_PASSWORD, existingUser.getPassword());
         verify(jwtUtil).generateToken(existingUser.getUsername(), existingUser.getUserRole());
+    }
+
+    @Test
+    public void testLoginUser_WrongPassword() {
+        UserLoginRequestDTO requestDTO = UserLoginRequestDTO.builder()
+                .username(EXISTING_USERNAME)
+                .password(WRONG_PASSWORD)
+                .build();
+        User existingUser = User.builder()
+                .id(UUID.randomUUID())
+                .username(EXISTING_USERNAME)
+                .password(ENCODED_PASSWORD)
+                .userRole(REGULAR_ROLE)
+                .build();
+
+        when(userRepository.findByUsername(EXISTING_USERNAME)).thenReturn(Optional.of(existingUser));
+        when(passwordEncoder.matches(WRONG_PASSWORD, existingUser.getPassword())).thenReturn(false);
+
+        // this test probably fail after refactoring...
+        // while I was writing the code I didn't realized that the InvalidInputException was coming from excuse exceptions
+        // (a bad naming for InvalidInputException) (a lazy work for credential mismatch)
+        // that's the reason we are going to do the refactoring!
+        // if you wonder why this test fails, this is why! change the InvalidInputException to what I deem worthy while refactoring
+        // I'm not going to forget to read this comment block, right? right?
+        assertThrows(InvalidInputException.class, () -> userService.login(requestDTO));
+
+        verify(userRepository).findByUsername(EXISTING_USERNAME);
+        verify(passwordEncoder).matches(WRONG_PASSWORD, existingUser.getPassword());
     }
 }
