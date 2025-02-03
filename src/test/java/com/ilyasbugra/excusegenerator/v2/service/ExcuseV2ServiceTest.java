@@ -85,6 +85,25 @@ public class ExcuseV2ServiceTest {
     }
 
     @Test
+    public void testGetAllExcuses_EmptyDatabase() {
+        // Arrange
+        Page<Excuse> page = new PageImpl<>(List.of(), PAGEABLE_DEFAULT, 0);
+
+        when(excuseRepository.findAll(PAGEABLE_DEFAULT))
+                .thenReturn(page);
+
+        // Act
+        Page<ExcuseV2DTO> result = excuseV2Service.getAllExcuses(PAGEABLE_DEFAULT);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(page.getTotalElements(), result.getTotalElements());
+
+        verify(excuseRepository).findAll(PAGEABLE_DEFAULT);
+        verify(excuseV2Mapper, times(0)).toExcuseV2DTO(any(Excuse.class));
+    }
+
+    @Test
     public void testGetExcuseById() {
         // Arrange
         Excuse excuse = createExcuses().getFirst();
