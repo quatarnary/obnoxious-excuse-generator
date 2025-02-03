@@ -216,6 +216,32 @@ public class ExcuseV2ServiceTest {
         verify(excuseRepository).findAll(any(PageRequest.class));
     }
 
+    @Test
+    public void testGetExcusesByCategory() {
+        // Arrange
+        List<Excuse> excuses = createExcuses();
+        Page<Excuse> page = new PageImpl<>(excuses, PAGEABLE_DEFAULT, excuses.size());
+        List<ExcuseV2DTO> excuseV2DTOS = createExcuseV2DTOs(excuses);
+
+        when(excuseRepository.findByCategoryStartingWithIgnoreCase(CATEGORY, PAGEABLE_DEFAULT))
+                .thenReturn(page);
+
+        when(excuseV2Mapper.toExcuseV2DTO(any(Excuse.class)))
+                .thenReturn(excuseV2DTOS.get(0), excuseV2DTOS.get(1));
+
+        // Act
+        Page<ExcuseV2DTO> result = excuseV2Service.getExcusesByCategory(CATEGORY, PAGEABLE_DEFAULT);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(excuses.size(), result.getTotalElements());
+        assertEquals(excuseV2DTOS.get(0).getExcuseMessage(), result.getContent().get(0).getExcuseMessage());
+        assertEquals(excuseV2DTOS.get(1).getExcuseMessage(), result.getContent().get(1).getExcuseMessage());
+
+        verify(excuseRepository).findByCategoryStartingWithIgnoreCase(CATEGORY, PAGEABLE_DEFAULT);
+        verify(excuseV2Mapper, times(2)).toExcuseV2DTO(any(Excuse.class));
+    }
+
     // 🔹 Helper Methods 🔹
     private List<Excuse> createExcuses() {
         return List.of(
