@@ -173,6 +173,22 @@ public class ExcuseV2ServiceTest {
         verify(excuseV2Mapper, times(1)).toExcuseV2DTO(any(Excuse.class));
     }
 
+    @Test
+    public void testGetRandomExcuse_EmptyDatabase() {
+        // Arrange
+        when(excuseRepository.count()).thenReturn(0L);
+
+        // Act and Assert
+        ExcuseNotFoundException thrown = assertThrows(
+                ExcuseNotFoundException.class,
+                () -> excuseV2Service.getRandomExcuse()
+        );
+
+        assertEquals(String.format(ErrorMessages.EXCUSE_NOT_FOUND, 0L), thrown.getMessage());
+
+        verify(excuseRepository).count();
+    }
+
     // 🔹 Helper Methods 🔹
     private List<Excuse> createExcuses() {
         return List.of(
