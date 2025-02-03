@@ -9,7 +9,6 @@ import com.ilyasbugra.excusegenerator.v2.dto.ExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.mapper.ExcuseV2Mapper;
 import com.ilyasbugra.excusegenerator.v2.model.User;
 import com.ilyasbugra.excusegenerator.v2.model.UserRole;
-import com.ilyasbugra.excusegenerator.v2.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -55,8 +54,6 @@ public class ExcuseV2ServiceTest {
     Random random;
     @Mock
     ExcuseV2Mapper excuseV2Mapper;
-    @Mock
-    UserRepository userRepository;
     @InjectMocks
     ExcuseV2Service excuseV2Service;
 
