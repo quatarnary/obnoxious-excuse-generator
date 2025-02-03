@@ -1,7 +1,9 @@
 package com.ilyasbugra.excusegenerator.v2.service;
 
+import com.ilyasbugra.excusegenerator.exception.ExcuseNotFoundException;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
+import com.ilyasbugra.excusegenerator.util.ErrorMessages;
 import com.ilyasbugra.excusegenerator.v2.dto.ExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.mapper.ExcuseV2Mapper;
 import com.ilyasbugra.excusegenerator.v2.model.User;
@@ -20,8 +22,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -123,6 +124,22 @@ public class ExcuseV2ServiceTest {
 
         verify(excuseRepository).findById(excuse.getId());
         verify(excuseV2Mapper, times(1)).toExcuseV2DTO(any(Excuse.class));
+    }
+
+    @Test
+    public void testGetExcuseById_NonExistentId() {
+        // Arrange
+        when(excuseRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // Act and Assert
+        ExcuseNotFoundException thrown = assertThrows(
+                ExcuseNotFoundException.class,
+                () -> excuseV2Service.getExcuseById(1L)
+        );
+
+        assertEquals(String.format(ErrorMessages.EXCUSE_NOT_FOUND, 1L), thrown.getMessage());
+
+        verify(excuseRepository).findById(anyLong());
     }
 
     // 🔹 Helper Methods 🔹
