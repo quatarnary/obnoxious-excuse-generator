@@ -1,5 +1,6 @@
 package com.ilyasbugra.excusegenerator.v2.service;
 
+import com.ilyasbugra.excusegenerator.exception.ExcuseCategoryNotFoundException;
 import com.ilyasbugra.excusegenerator.exception.ExcuseNotFoundException;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
@@ -240,6 +241,28 @@ public class ExcuseV2ServiceTest {
 
         verify(excuseRepository).findByCategoryStartingWithIgnoreCase(CATEGORY, PAGEABLE_DEFAULT);
         verify(excuseV2Mapper, times(2)).toExcuseV2DTO(any(Excuse.class));
+    }
+
+    @Test
+    public void testGetExcusesByCategory_NonExistentCategory() {
+        // Arrange
+        Page<Excuse> page = Page.empty();
+
+        when(excuseRepository.findByCategoryStartingWithIgnoreCase(CATEGORY, PAGEABLE_DEFAULT))
+                .thenReturn(page);
+
+        // Act
+        ExcuseCategoryNotFoundException thrown = assertThrows(
+                ExcuseCategoryNotFoundException.class,
+                () -> excuseV2Service.getExcusesByCategory(CATEGORY, PAGEABLE_DEFAULT)
+        );
+
+        // Assert
+        assertNotNull(thrown);
+        assertEquals(String.format(ErrorMessages.CATEGORY_NOT_FOUND, CATEGORY), thrown.getMessage());
+
+        verify(excuseRepository).findByCategoryStartingWithIgnoreCase(CATEGORY, PAGEABLE_DEFAULT);
+        verify(excuseV2Mapper, times(0)).toExcuseV2DTO(any(Excuse.class));
     }
 
     // 🔹 Helper Methods 🔹
