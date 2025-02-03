@@ -189,6 +189,33 @@ public class ExcuseV2ServiceTest {
         verify(excuseRepository).count();
     }
 
+    @Test
+    public void testGetRandomExcuse_EmptyPage() {
+        // Arrange
+        Long pageCount = 10L;
+        int randomBound = 10;
+        int randomPage = 1;
+
+        Page<Excuse> page = Page.empty();
+
+        when(excuseRepository.count()).thenReturn(pageCount);
+        when(random.nextInt(randomBound)).thenReturn(randomPage);
+        when(excuseRepository.findAll(any(PageRequest.class))).thenReturn(page);
+
+        // Act
+        ExcuseNotFoundException thrown = assertThrows(
+                ExcuseNotFoundException.class,
+                () -> excuseV2Service.getRandomExcuse()
+        );
+
+        // Assert
+        assertEquals(String.format(ErrorMessages.EXCUSE_NOT_FOUND, 0L), thrown.getMessage());
+
+        verify(excuseRepository).count();
+        verify(random).nextInt(randomBound);
+        verify(excuseRepository).findAll(any(PageRequest.class));
+    }
+
     // 🔹 Helper Methods 🔹
     private List<Excuse> createExcuses() {
         return List.of(
