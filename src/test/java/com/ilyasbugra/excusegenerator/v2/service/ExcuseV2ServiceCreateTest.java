@@ -1,7 +1,9 @@
 package com.ilyasbugra.excusegenerator.v2.service;
 
+import com.ilyasbugra.excusegenerator.exception.UserNotFoundException;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
+import com.ilyasbugra.excusegenerator.util.UserErrorMessages;
 import com.ilyasbugra.excusegenerator.v2.dto.CreateExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.dto.ExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.mapper.ExcuseV2Mapper;
@@ -219,5 +221,34 @@ public class ExcuseV2ServiceCreateTest {
         /// Assert
         assertNotNull(thrown);
         assertEquals("Authentication is null or empty", thrown.getMessage());
+    }
+
+    @Test
+    public void testCreateExcuse_UserNotFound() {
+        ///  Arrange
+        // the ugly not unit testable part... sad developer 😔
+        SecurityContextHolder.setContext(securityContext);
+
+        when(securityContext.getAuthentication())
+                .thenReturn(authentication);
+        when(authentication.getName())
+                .thenReturn(ADMIN_USER.getUsername());
+        when(userRepository.findByUsername(ADMIN_USER.getUsername()))
+                .thenReturn(Optional.empty());
+
+        /// Act
+        UserNotFoundException thrown = assertThrows(
+                UserNotFoundException.class,
+                () -> excuseV2Service.createExcuse(CREATE_EXCUSE_V2_DTO)
+        );
+
+        verify(securityContext, times(1)).getAuthentication();
+        verify(authentication, times(2)).getName();
+        verify(userRepository, times(1)).findByUsername(ADMIN_USER.getUsername());
+        verify(excuseV2Mapper, times(0)).toExcuse(any(CreateExcuseV2DTO.class));
+
+        /// Assert
+        assertNotNull(thrown);
+        assertEquals(String.format(UserErrorMessages.USER_NOT_FOUND, ADMIN_USER.getUsername()), thrown.getMessage());
     }
 }
