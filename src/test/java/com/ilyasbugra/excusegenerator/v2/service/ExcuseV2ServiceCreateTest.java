@@ -22,8 +22,7 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -122,6 +121,7 @@ public class ExcuseV2ServiceCreateTest {
         assertNotNull(savedExcuse.getCreatedBy());
         assertEquals(MESSAGE, result.getExcuseMessage());
         assertEquals(CATEGORY, result.getCategory());
+        assertNull(savedExcuse.getApprovedBy());
         assertEquals(MOD_USER.getUsername(), savedExcuse.getCreatedBy().getUsername());
     }
 }
