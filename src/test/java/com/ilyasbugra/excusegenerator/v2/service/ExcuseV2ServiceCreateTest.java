@@ -143,7 +143,7 @@ public class ExcuseV2ServiceCreateTest {
                 .thenReturn(EXCUSE);
         when(excuseV2Mapper.toExcuseV2DTO(EXCUSE))
                 .thenReturn(EXCUSE_V2_DTO);
-        
+
         /// Act
         ExcuseV2DTO result = excuseV2Service.createExcuse(CREATE_EXCUSE_V2_DTO);
 
@@ -167,5 +167,28 @@ public class ExcuseV2ServiceCreateTest {
         assertEquals(CATEGORY, result.getCategory());
         assertNull(savedExcuse.getApprovedBy());
         assertEquals(ADMIN_USER.getUsername(), savedExcuse.getCreatedBy().getUsername());
+    }
+
+    @Test
+    public void testCreateExcuse_AuthenticationNull() {
+        ///  Arrange
+        // the ugly not unit testable part... sad developer 😔
+        SecurityContextHolder.setContext(securityContext);
+
+        when(securityContext.getAuthentication())
+                .thenReturn(null);
+
+        /// Act
+        IllegalStateException thrown = assertThrows(
+                IllegalStateException.class,
+                () -> excuseV2Service.createExcuse(CREATE_EXCUSE_V2_DTO)
+        );
+
+        verify(securityContext, times(1)).getAuthentication();
+        verify(authentication, times(0)).getName();
+
+        /// Assert
+        assertNotNull(thrown);
+        assertEquals("Authentication is null or empty", thrown.getMessage());
     }
 }
