@@ -124,4 +124,48 @@ public class ExcuseV2ServiceCreateTest {
         assertNull(savedExcuse.getApprovedBy());
         assertEquals(MOD_USER.getUsername(), savedExcuse.getCreatedBy().getUsername());
     }
+
+    @Test
+    public void testCreateExcuse_Admin() {
+        ///  Arrange
+        // the ugly not unit testable part... sad developer 😔
+        SecurityContextHolder.setContext(securityContext);
+
+        when(securityContext.getAuthentication())
+                .thenReturn(authentication);
+        when(authentication.getName())
+                .thenReturn(ADMIN_USER.getUsername());
+        when(userRepository.findByUsername(ADMIN_USER.getUsername()))
+                .thenReturn(Optional.of(ADMIN_USER));
+        when(excuseV2Mapper.toExcuse(CREATE_EXCUSE_V2_DTO))
+                .thenReturn(EXCUSE);
+        when(excuseRepository.save(EXCUSE))
+                .thenReturn(EXCUSE);
+        when(excuseV2Mapper.toExcuseV2DTO(EXCUSE))
+                .thenReturn(EXCUSE_V2_DTO);
+        
+        /// Act
+        ExcuseV2DTO result = excuseV2Service.createExcuse(CREATE_EXCUSE_V2_DTO);
+
+        ArgumentCaptor<Excuse> excuseCaptor = ArgumentCaptor.forClass(Excuse.class);
+
+        verify(securityContext, times(1)).getAuthentication();
+        verify(authentication, times(2)).getName();
+        verify(userRepository, times(1)).findByUsername(ADMIN_USER.getUsername());
+        verify(excuseV2Mapper, times(1)).toExcuse(CREATE_EXCUSE_V2_DTO);
+        verify(excuseRepository, times(1)).save(excuseCaptor.capture());
+        verify(excuseV2Mapper, times(1)).toExcuseV2DTO(EXCUSE);
+
+        Excuse savedExcuse = excuseCaptor.getValue();
+
+        /// Assert
+        assertNotNull(result);
+        assertNotNull(result.getId());
+        assertNotNull(result.getUpdatedAt());
+        assertNotNull(savedExcuse.getCreatedBy());
+        assertEquals(MESSAGE, result.getExcuseMessage());
+        assertEquals(CATEGORY, result.getCategory());
+        assertNull(savedExcuse.getApprovedBy());
+        assertEquals(ADMIN_USER.getUsername(), savedExcuse.getCreatedBy().getUsername());
+    }
 }
