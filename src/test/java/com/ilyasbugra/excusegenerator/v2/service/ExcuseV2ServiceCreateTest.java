@@ -31,6 +31,23 @@ public class ExcuseV2ServiceCreateTest {
 
     public static final String MESSAGE = "excuse-message";
     public static final String CATEGORY = "category";
+    public static final Excuse EXCUSE = Excuse.builder()
+            .id(0L)
+            .excuseMessage(MESSAGE)
+            .category(CATEGORY)
+            .createdAt(new Date())
+            .updatedAt(new Date())
+            .build();
+    public static final ExcuseV2DTO EXCUSE_V2_DTO = ExcuseV2DTO.builder()
+            .id(EXCUSE.getId())
+            .excuseMessage(EXCUSE.getExcuseMessage())
+            .category(EXCUSE.getCategory())
+            .updatedAt(EXCUSE.getUpdatedAt())
+            .build();
+    public static final CreateExcuseV2DTO CREATE_EXCUSE_V2_DTO = CreateExcuseV2DTO.builder()
+            .excuseMessage(MESSAGE)
+            .category(CATEGORY)
+            .build();
 
     private static final User ADMIN_USER = User.builder()
             .id(UUID.randomUUID())
@@ -68,24 +85,6 @@ public class ExcuseV2ServiceCreateTest {
     @Test
     public void testCreateExcuse_Mod() {
         /// Arrange
-        CreateExcuseV2DTO createExcuseV2DTO = CreateExcuseV2DTO.builder()
-                .excuseMessage(MESSAGE)
-                .category(CATEGORY)
-                .build();
-        Excuse excuse = Excuse.builder()
-                .id(0L)
-                .excuseMessage(MESSAGE)
-                .category(CATEGORY)
-                .createdAt(new Date())
-                .updatedAt(new Date())
-                .build();
-        ExcuseV2DTO excuseV2DTO = ExcuseV2DTO.builder()
-                .id(excuse.getId())
-                .excuseMessage(excuse.getExcuseMessage())
-                .category(excuse.getCategory())
-                .updatedAt(excuse.getUpdatedAt())
-                .build();
-
         // the ugly not unit testable part... sad developer 😔
         SecurityContextHolder.setContext(securityContext);
 
@@ -95,28 +94,28 @@ public class ExcuseV2ServiceCreateTest {
                 .thenReturn(MOD_USER.getUsername());
         when(userRepository.findByUsername(MOD_USER.getUsername()))
                 .thenReturn(Optional.of(MOD_USER));
-        when(excuseV2Mapper.toExcuse(createExcuseV2DTO))
-                .thenReturn(excuse);
-        when(excuseRepository.save(excuse))
-                .thenReturn(excuse);
-        when(excuseV2Mapper.toExcuseV2DTO(excuse))
-                .thenReturn(excuseV2DTO);
+        when(excuseV2Mapper.toExcuse(CREATE_EXCUSE_V2_DTO))
+                .thenReturn(EXCUSE);
+        when(excuseRepository.save(EXCUSE))
+                .thenReturn(EXCUSE);
+        when(excuseV2Mapper.toExcuseV2DTO(EXCUSE))
+                .thenReturn(EXCUSE_V2_DTO);
 
         /// Act
-        ExcuseV2DTO result = excuseV2Service.createExcuse(createExcuseV2DTO);
+        ExcuseV2DTO result = excuseV2Service.createExcuse(CREATE_EXCUSE_V2_DTO);
 
-        /// Assert
         ArgumentCaptor<Excuse> excuseCaptor = ArgumentCaptor.forClass(Excuse.class);
 
         verify(securityContext, times(1)).getAuthentication();
         verify(authentication, times(2)).getName();
         verify(userRepository, times(1)).findByUsername(MOD_USER.getUsername());
-        verify(excuseV2Mapper, times(1)).toExcuse(createExcuseV2DTO);
+        verify(excuseV2Mapper, times(1)).toExcuse(CREATE_EXCUSE_V2_DTO);
         verify(excuseRepository, times(1)).save(excuseCaptor.capture());
-        verify(excuseV2Mapper, times(1)).toExcuseV2DTO(excuse);
+        verify(excuseV2Mapper, times(1)).toExcuseV2DTO(EXCUSE);
 
         Excuse savedExcuse = excuseCaptor.getValue();
 
+        /// Assert
         assertNotNull(result);
         assertNotNull(result.getId());
         assertNotNull(result.getUpdatedAt());
