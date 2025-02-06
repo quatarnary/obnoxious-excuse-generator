@@ -1,7 +1,9 @@
 package com.ilyasbugra.excusegenerator.v2.service;
 
+import com.ilyasbugra.excusegenerator.exception.UserNotAuthorized;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
+import com.ilyasbugra.excusegenerator.util.UserErrorMessages;
 import com.ilyasbugra.excusegenerator.v2.dto.ExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UpdateExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.mapper.ExcuseV2Mapper;
@@ -22,14 +24,14 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ExcuseV2ServiceUpdateTest {
 
     public static final UUID MOD_USER_ID = UUID.randomUUID();
+    public static final UUID SECOND_MOD_USER_ID = UUID.randomUUID();
 
     public static final Long EXCUSE_ID = 0L;
     public static final String MESSAGE = "excuse-message";
@@ -60,6 +62,12 @@ public class ExcuseV2ServiceUpdateTest {
             .excuseMessage(EXCUSE.getExcuseMessage())
             .category(EXCUSE.getCategory())
             .updatedAt(EXCUSE.getUpdatedAt())
+            .build();
+    private static final User SECOND_MOD_USER = User.builder()
+            .id(SECOND_MOD_USER_ID)
+            .username("imma-be-second-mod-lololololol")
+            .password("password-go-brrrrrr")
+            .userRole(UserRole.MOD)
             .build();
     @Mock
     SecurityContext securityContext;
@@ -128,5 +136,37 @@ public class ExcuseV2ServiceUpdateTest {
         assertEquals(UPDATE_CATEGORY, updatedExcuse.getCategory());
         assertEquals(MOD_USER_ID, updatedExcuse.getUpdatedBy().getId());
         assertEquals(EXCUSE.getCreatedBy().getId(), updatedExcuse.getCreatedBy().getId());
+    }
+
+    @Test
+    public void testUpdateExcuse_Mod_Not_CreatedBySelf() {
+        /// Arrange
+        // the ugly not unit testable part... sad developer 😔
+        SecurityContextHolder.setContext(securityContext);
+
+        when(SecurityContextHolder.getContext().getAuthentication())
+                .thenReturn(authentication);
+        when(authentication.getName())
+                .thenReturn(SECOND_MOD_USER.getUsername());
+        when(userRepository.findByUsername(SECOND_MOD_USER.getUsername()))
+                .thenReturn(Optional.of(SECOND_MOD_USER));
+        when(excuseRepository.findById(EXCUSE_ID))
+                .thenReturn(Optional.of(EXCUSE));
+
+        /// Act
+        UserNotAuthorized thrown = assertThrows(
+                UserNotAuthorized.class,
+                () -> excuseV2Service.updateExcuse(EXCUSE_ID, UPDATE_EXCUSE_V2_DTO)
+        );
+
+        verify(SecurityContextHolder.getContext()).getAuthentication();
+        verify(authentication, times(2)).getName();
+        verify(userRepository).findByUsername(SECOND_MOD_USER.getUsername());
+        verify(excuseRepository).findById(EXCUSE_ID);
+        verify(excuseV2Mapper, times(0)).updateExcuseV2(UPDATE_EXCUSE_V2_DTO, EXCUSE);
+
+        /// Assert
+        assertNotNull(thrown);
+        assertEquals(String.format(UserErrorMessages.USER_NOT_AUTHORIZED, SECOND_MOD_USER.getUsername()), thrown.getMessage());
     }
 }
