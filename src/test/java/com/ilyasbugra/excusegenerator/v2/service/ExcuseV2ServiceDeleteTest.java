@@ -28,6 +28,7 @@ public class ExcuseV2ServiceDeleteTest {
 
     public static final UUID MOD_USER_ID = UUID.randomUUID();
     public static final UUID SECOND_MOD_USER_ID = UUID.randomUUID();
+    public static final UUID ADMIN_USER_ID = UUID.randomUUID();
 
     public static final Long EXCUSE_ID = 0L;
     public static final String MESSAGE = "excuse-message";
@@ -52,6 +53,12 @@ public class ExcuseV2ServiceDeleteTest {
             .username("imma-be-second-mod-lololololol")
             .password("password-go-brrrrrr")
             .userRole(UserRole.MOD)
+            .build();
+    private static final User ADMIN_USER = User.builder()
+            .id(ADMIN_USER_ID)
+            .username("admin-lololololol")
+            .password("password-go-brrrrrr")
+            .userRole(UserRole.ADMIN)
             .build();
     @Mock
     Authentication authentication;
@@ -123,5 +130,33 @@ public class ExcuseV2ServiceDeleteTest {
         /// Assert
         assertNotNull(thrown);
         assertEquals(String.format(UserErrorMessages.USER_NOT_AUTHORIZED, SECOND_MOD_USER.getUsername()), thrown.getMessage());
+    }
+
+    @Test
+    public void testDeleteExcuse_Admin_Not_CreatedBySelf() {
+        /// Arrange
+        // the ugly not unit testable part... sad developer 😔
+        SecurityContextHolder.setContext(securityContext);
+
+        when(SecurityContextHolder.getContext().getAuthentication())
+                .thenReturn(authentication);
+        when(authentication.getName())
+                .thenReturn(ADMIN_USER.getUsername());
+        when(userRepository.findByUsername(ADMIN_USER.getUsername()))
+                .thenReturn(Optional.of(ADMIN_USER));
+        when(excuseRepository.findById(EXCUSE_ID))
+                .thenReturn(Optional.of(EXCUSE));
+        doNothing().when(excuseRepository).deleteById(EXCUSE_ID);
+
+        /// Act
+        excuseV2Service.deleteExcuse(EXCUSE_ID);
+
+        verify(SecurityContextHolder.getContext()).getAuthentication();
+        verify(authentication, times(2)).getName();
+        verify(userRepository).findByUsername(ADMIN_USER.getUsername());
+        verify(excuseRepository).findById(EXCUSE_ID);
+        verify(excuseRepository).deleteById(EXCUSE_ID);
+
+        /// Assert
     }
 }
