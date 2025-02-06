@@ -32,6 +32,7 @@ public class ExcuseV2ServiceUpdateTest {
 
     public static final UUID MOD_USER_ID = UUID.randomUUID();
     public static final UUID SECOND_MOD_USER_ID = UUID.randomUUID();
+    public static final UUID ADMIN_USER_ID = UUID.randomUUID();
 
     public static final Long EXCUSE_ID = 0L;
     public static final String MESSAGE = "excuse-message";
@@ -68,6 +69,12 @@ public class ExcuseV2ServiceUpdateTest {
             .username("imma-be-second-mod-lololololol")
             .password("password-go-brrrrrr")
             .userRole(UserRole.MOD)
+            .build();
+    private static final User ADMIN_USER = User.builder()
+            .id(ADMIN_USER_ID)
+            .username("admin-lololololol")
+            .password("password-go-brrrrrr")
+            .userRole(UserRole.ADMIN)
             .build();
     @Mock
     SecurityContext securityContext;
@@ -168,5 +175,61 @@ public class ExcuseV2ServiceUpdateTest {
         /// Assert
         assertNotNull(thrown);
         assertEquals(String.format(UserErrorMessages.USER_NOT_AUTHORIZED, SECOND_MOD_USER.getUsername()), thrown.getMessage());
+    }
+
+    @Test
+    public void testUpdateExcuse_Admin_Not_CreatedBySelf() {
+        /// Arrange
+        // the ugly not unit testable part... sad developer 😔
+        SecurityContextHolder.setContext(securityContext);
+
+        when(SecurityContextHolder.getContext().getAuthentication())
+                .thenReturn(authentication);
+        when(authentication.getName())
+                .thenReturn(ADMIN_USER.getUsername());
+        when(userRepository.findByUsername(ADMIN_USER.getUsername()))
+                .thenReturn(Optional.of(ADMIN_USER));
+        when(excuseRepository.findById(EXCUSE_ID))
+                .thenReturn(Optional.of(EXCUSE));
+        doAnswer(invocation -> {
+            UpdateExcuseV2DTO mapperUpdateExcuseV2DTO = invocation.getArgument(0);
+            Excuse mapperExcuse = invocation.getArgument(1);
+
+            mapperExcuse.setExcuseMessage(mapperUpdateExcuseV2DTO.getExcuseMessage());
+            mapperExcuse.setCategory(mapperUpdateExcuseV2DTO.getCategory());
+
+            EXCUSE.setExcuseMessage(mapperUpdateExcuseV2DTO.getExcuseMessage());
+            EXCUSE.setCategory(mapperUpdateExcuseV2DTO.getCategory());
+
+            return null;
+        }).when(excuseV2Mapper).updateExcuseV2(UPDATE_EXCUSE_V2_DTO, EXCUSE);
+        when(excuseRepository.save(EXCUSE))
+                .thenReturn(EXCUSE);
+        when(excuseV2Mapper.toExcuseV2DTO(EXCUSE))
+                .thenReturn(EXCUSE_V2_DTO);
+
+        /// Act
+        ExcuseV2DTO result = excuseV2Service.updateExcuse(EXCUSE_ID, UPDATE_EXCUSE_V2_DTO);
+
+        ArgumentCaptor<Excuse> excuseCaptor = ArgumentCaptor.forClass(Excuse.class);
+
+        verify(SecurityContextHolder.getContext()).getAuthentication();
+        verify(authentication, times(2)).getName();
+        verify(userRepository).findByUsername(ADMIN_USER.getUsername());
+        verify(excuseRepository).findById(EXCUSE_ID);
+        verify(excuseV2Mapper).updateExcuseV2(UPDATE_EXCUSE_V2_DTO, EXCUSE);
+        verify(excuseRepository).save(excuseCaptor.capture());
+        verify(excuseV2Mapper).toExcuseV2DTO(EXCUSE);
+
+        Excuse updatedExcuse = excuseCaptor.getValue();
+
+        /// Assert
+        assertNotNull(result);
+        assertEquals(EXCUSE_ID, updatedExcuse.getId());
+        assertEquals(UPDATE_MESSAGE, updatedExcuse.getExcuseMessage());
+        assertEquals(UPDATE_CATEGORY, updatedExcuse.getCategory());
+        assertEquals(ADMIN_USER_ID, updatedExcuse.getUpdatedBy().getId());
+        assertEquals(EXCUSE.getCreatedBy().getId(), updatedExcuse.getCreatedBy().getId());
+        assertNotEquals(updatedExcuse.getCreatedBy().getId(), updatedExcuse.getUpdatedBy().getId());
     }
 }
