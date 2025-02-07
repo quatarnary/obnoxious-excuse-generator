@@ -13,7 +13,6 @@ import com.ilyasbugra.excusegenerator.v2.dto.UpdateExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.mapper.ExcuseV2Mapper;
 import com.ilyasbugra.excusegenerator.v2.model.User;
 import com.ilyasbugra.excusegenerator.v2.model.UserRole;
-import com.ilyasbugra.excusegenerator.v2.repository.UserRepository;
 import com.ilyasbugra.excusegenerator.v2.util.AuthHelper;
 import com.ilyasbugra.excusegenerator.v2.util.ExcuseHelper;
 import com.ilyasbugra.excusegenerator.v2.util.UserHelper;
@@ -32,17 +31,15 @@ public class ExcuseV2Service {
     private final ExcuseRepository excuseRepository;
     private final Random random;
     private final ExcuseV2Mapper excuseV2Mapper;
-    private final UserRepository userRepository;
     private final UserHelper userHelper;
     private final ExcuseHelper excuseHelper;
 
     private final Logger logger = LoggerFactory.getLogger(ExcuseV2Service.class);
 
-    public ExcuseV2Service(ExcuseRepository excuseRepository, Random random, ExcuseV2Mapper excuseV2Mapper, UserRepository userRepository, UserHelper userHelper, ExcuseHelper excuseHelper) {
+    public ExcuseV2Service(ExcuseRepository excuseRepository, Random random, ExcuseV2Mapper excuseV2Mapper, UserHelper userHelper, ExcuseHelper excuseHelper) {
         this.excuseRepository = excuseRepository;
         this.random = random;
         this.excuseV2Mapper = excuseV2Mapper;
-        this.userRepository = userRepository;
         this.userHelper = userHelper;
         this.excuseHelper = excuseHelper;
     }
@@ -119,6 +116,16 @@ public class ExcuseV2Service {
             throw new UserNotAuthorized(user.getUsername());
         }
 
+        boolean canUpdate = switch (user.getUserRole()) {
+            case ADMIN -> new AdminUser().updateExcuse(excuse, user);
+            case MOD -> new ModUser().updateExcuse(excuse, user);
+            default -> false;
+        };
+
+        if (!canUpdate) {
+            throw new UserNotAuthorized(user.getUsername());
+        }
+
         // TODO: how did I thought that mapper returning something for one method and not returning anything would be good
         // It really happened, the thing people say about you know what your code is doing now but even you are not going
         // remember what is doing in the future... I was just looking at the line thinking that how did update method was working
@@ -128,9 +135,19 @@ public class ExcuseV2Service {
         // T-25-Jan-2025-19:41
         // God why! WHYYYYYY!
         // T-25-jan-2025-21:47
+        // god still why...
+        // t-8-feb-25-01:13
         excuseV2Mapper.updateExcuseV2(updateExcuseV2DTO, excuse);
         // anyway I was already going to change the mapper to also set the updatedBy so I'll fix it when I'm refactoring that part
-        excuse.setUpdatedBy(user);
+//        excuse.setUpdatedBy(user);
+        // ========
+        // guess what old me... once again you leave that problem to me...
+        // which was totally right decision. you were dealing with the framework
+        // I'm dealing with the logic...
+        // note to current self: don't try to force something you can't wrap your head around. leave it future self
+        // note to future self: past you is dealing with shit ton of bullshit... be understanding about past decisions
+        // xoxo
+        // t-8-feb-25-01:16
 
         Excuse updatedExcuse = excuseRepository.save(excuse);
         logger.debug("User: '{}' with role: {} updated the excuse with id: '{}'", user.getUsername(), user.getUserRole(), updatedExcuse.getId());
