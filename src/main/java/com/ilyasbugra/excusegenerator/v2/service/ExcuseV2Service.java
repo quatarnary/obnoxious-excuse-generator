@@ -6,6 +6,8 @@ import com.ilyasbugra.excusegenerator.exception.UserNotAuthorized;
 import com.ilyasbugra.excusegenerator.exception.UserNotFoundException;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
+import com.ilyasbugra.excusegenerator.v2.actions.admin.AdminUser;
+import com.ilyasbugra.excusegenerator.v2.actions.mod.ModUser;
 import com.ilyasbugra.excusegenerator.v2.dto.CreateExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.dto.ExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UpdateExcuseV2DTO;
@@ -13,6 +15,8 @@ import com.ilyasbugra.excusegenerator.v2.mapper.ExcuseV2Mapper;
 import com.ilyasbugra.excusegenerator.v2.model.User;
 import com.ilyasbugra.excusegenerator.v2.model.UserRole;
 import com.ilyasbugra.excusegenerator.v2.repository.UserRepository;
+import com.ilyasbugra.excusegenerator.v2.util.AuthHelper;
+import com.ilyasbugra.excusegenerator.v2.util.UserHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -31,14 +35,16 @@ public class ExcuseV2Service {
     private final Random random;
     private final ExcuseV2Mapper excuseV2Mapper;
     private final UserRepository userRepository;
+    private final UserHelper userHelper;
 
     private final Logger logger = LoggerFactory.getLogger(ExcuseV2Service.class);
 
-    public ExcuseV2Service(ExcuseRepository excuseRepository, Random random, ExcuseV2Mapper excuseV2Mapper, UserRepository userRepository) {
+    public ExcuseV2Service(ExcuseRepository excuseRepository, Random random, ExcuseV2Mapper excuseV2Mapper, UserRepository userRepository, UserHelper userHelper) {
         this.excuseRepository = excuseRepository;
         this.random = random;
         this.excuseV2Mapper = excuseV2Mapper;
         this.userRepository = userRepository;
+        this.userHelper = userHelper;
     }
 
     public Page<ExcuseV2DTO> getAllExcuses(Pageable pageable) {
@@ -78,21 +84,16 @@ public class ExcuseV2Service {
     }
 
     public ExcuseV2DTO createExcuse(CreateExcuseV2DTO createExcuseV2DTO) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getName() == null) {
-            logger.error("Authentication is null or empty: {}", authentication != null ? authentication.getName() : "auth is null");
-            throw new IllegalStateException("Authentication is null or empty");
-        }
-        String username = authentication.getName();
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> {
-                    logger.error("Username {} not found", username);
-                    return new UserNotFoundException(username);
-                });
+        String username = AuthHelper.getAuthenticatedUsername();
+        User user = userHelper.getUserByUsername(username);
 
         Excuse excuse = excuseV2Mapper.toExcuse(createExcuseV2DTO);
-        excuse.setCreatedBy(user);
+
+        switch (user.getUserRole()) {
+            case ADMIN -> new AdminUser().createExcuse(excuse, user);
+            case MOD -> new ModUser().createExcuse(excuse, user);
+            default -> throw new UserNotAuthorized(user.getUsername());
+        }
 
         Excuse savedExcuse = excuseRepository.save(excuse);
         return excuseV2Mapper.toExcuseV2DTO(savedExcuse);
