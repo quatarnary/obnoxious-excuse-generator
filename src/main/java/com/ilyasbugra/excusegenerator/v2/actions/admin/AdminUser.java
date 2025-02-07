@@ -1,5 +1,5 @@
 package com.ilyasbugra.excusegenerator.v2.actions.admin;
 
-public class AdminUser implements IAdminCreateExcuse, IAdminDeleteExcuse {
+public class AdminUser implements IAdminCreateExcuse, IAdminDeleteExcuse, IAdminApproveExcuse {
     // All Logic handled via Interfaces for now.
 }

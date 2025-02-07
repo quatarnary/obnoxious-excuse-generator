@@ -192,30 +192,22 @@ public class ExcuseV2Service {
     // it is working but currently if an admin approves an already approved excuse, it overwrites it
     // we should prevent that so that we can do one less write operation...
     public ExcuseV2DTO approveExcuse(Long id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getName() == null) {
-            logger.error("Authentication is null or empty: {}", authentication != null ? authentication.getName() : "auth is null");
-            throw new IllegalStateException("Authentication is null or empty");
-        }
-        String username = authentication.getName();
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> {
-                    logger.error("Username {} not found", username);
-                    return new UserNotFoundException(username);
-                });
+        String username = AuthHelper.getAuthenticatedUsername();
+        User user = userHelper.getUserByUsername(username);
 
         if (user.getUserRole() != UserRole.ADMIN) {
             logger.error("User '{}' is not an admin user", username);
         }
 
-        Excuse excuse = excuseRepository.findById(id)
-                .orElseThrow(() -> new ExcuseNotFoundException(id));
+        Excuse excuse = excuseHelper.getExcuseById(id);
 
-        excuse.setApprovedBy(user);
+        switch (user.getUserRole()) {
+            case ADMIN -> new AdminUser().approveExcuse(excuse, user);
+            default -> throw new UserNotAuthorized(user.getUsername());
+        }
 
         Excuse approvedExcuse = excuseRepository.save(excuse);
-        logger.debug("User: '{}' with role: {} updated the excuse with id: '{}'", user.getUsername(), user.getUserRole(), approvedExcuse.getId());
+        logger.debug("User: '{}' with role: {} approved the excuse with id: '{}'", user.getUsername(), user.getUserRole(), approvedExcuse.getId());
         logger.debug("Excuse updated: {}", approvedExcuse.getId());
 
         return excuseV2Mapper.toExcuseV2DTO(approvedExcuse);
