@@ -191,6 +191,11 @@ public class ExcuseV2Service {
     // approveExcuse confirmation
     // it is working but currently if an admin approves an already approved excuse, it overwrites it
     // we should prevent that so that we can do one less write operation...
+    // =====================
+    // Oh I also forgot to add a timestamp comment here
+    // but it feels so good to finally refactor everything.. a little late? well better than never!
+    // xoxo
+    // t-8-feb-25 00:14
     public ExcuseV2DTO approveExcuse(Long id) {
         String username = AuthHelper.getAuthenticatedUsername();
         User user = userHelper.getUserByUsername(username);
