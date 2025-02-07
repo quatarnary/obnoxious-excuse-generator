@@ -16,6 +16,7 @@ import com.ilyasbugra.excusegenerator.v2.model.User;
 import com.ilyasbugra.excusegenerator.v2.model.UserRole;
 import com.ilyasbugra.excusegenerator.v2.repository.UserRepository;
 import com.ilyasbugra.excusegenerator.v2.util.AuthHelper;
+import com.ilyasbugra.excusegenerator.v2.util.ExcuseHelper;
 import com.ilyasbugra.excusegenerator.v2.util.UserHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,15 +37,17 @@ public class ExcuseV2Service {
     private final ExcuseV2Mapper excuseV2Mapper;
     private final UserRepository userRepository;
     private final UserHelper userHelper;
+    private final ExcuseHelper excuseHelper;
 
     private final Logger logger = LoggerFactory.getLogger(ExcuseV2Service.class);
 
-    public ExcuseV2Service(ExcuseRepository excuseRepository, Random random, ExcuseV2Mapper excuseV2Mapper, UserRepository userRepository, UserHelper userHelper) {
+    public ExcuseV2Service(ExcuseRepository excuseRepository, Random random, ExcuseV2Mapper excuseV2Mapper, UserRepository userRepository, UserHelper userHelper, ExcuseHelper excuseHelper) {
         this.excuseRepository = excuseRepository;
         this.random = random;
         this.excuseV2Mapper = excuseV2Mapper;
         this.userRepository = userRepository;
         this.userHelper = userHelper;
+        this.excuseHelper = excuseHelper;
     }
 
     public Page<ExcuseV2DTO> getAllExcuses(Pageable pageable) {
@@ -152,30 +155,26 @@ public class ExcuseV2Service {
     // Yes I'm just doing copy-paste and I know it is wrong but this will make also the delete work as intendedish for now
     // the next step is to refactor all of these things, so just bare with me for a sec here
     // t-25-jan-25-21:53
+    // Yeah it was not a sec but here I am. Doing refactoring. Sorry that it took so long.
+    // t-7-feb-25-23:44
     public void deleteExcuse(Long id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getName() == null) {
-            logger.error("Authentication is null or empty: {}", authentication != null ? authentication.getName() : "auth is null");
-            throw new IllegalStateException("Authentication is null or empty");
-        }
-        String username = authentication.getName();
+        String username = AuthHelper.getAuthenticatedUsername();
+        User user = userHelper.getUserByUsername(username);
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> {
-                    logger.error("Username {} not found", username);
-                    return new UserNotFoundException(username);
-                });
 
         if (user.getUserRole() == UserRole.REGULAR) {
             logger.error("User '{}' is regular user", username);
         }
 
-        Excuse excuse = excuseRepository.findById(id)
-                .orElseThrow(() -> new ExcuseNotFoundException(id));
+        Excuse excuse = excuseHelper.getExcuseById(id);
 
-        if (user.getUserRole() == UserRole.MOD
-                && !excuse.getCreatedBy().getId().equals(user.getId())) {
-            logger.debug("User '{}' tried to delete with role '{}'", user.getUsername(), user.getUserRole());
+        boolean canDelete = switch (user.getUserRole()) {
+            case ADMIN -> new AdminUser().deleteExcuse();
+            case MOD -> new ModUser().deleteExcuse(excuse, user);
+            default -> false;
+        };
+
+        if (!canDelete) {
             throw new UserNotAuthorized(user.getUsername());
         }
 
