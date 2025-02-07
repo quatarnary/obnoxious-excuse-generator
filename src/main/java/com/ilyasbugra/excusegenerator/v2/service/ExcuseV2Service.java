@@ -3,7 +3,6 @@ package com.ilyasbugra.excusegenerator.v2.service;
 import com.ilyasbugra.excusegenerator.exception.ExcuseCategoryNotFoundException;
 import com.ilyasbugra.excusegenerator.exception.ExcuseNotFoundException;
 import com.ilyasbugra.excusegenerator.exception.UserNotAuthorized;
-import com.ilyasbugra.excusegenerator.exception.UserNotFoundException;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
 import com.ilyasbugra.excusegenerator.v2.actions.admin.AdminUser;
@@ -23,8 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
@@ -103,27 +100,18 @@ public class ExcuseV2Service {
     }
 
     public ExcuseV2DTO updateExcuse(Long id, UpdateExcuseV2DTO updateExcuseV2DTO) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getName() == null) {
-            logger.error("Authentication is null or empty: {}", authentication != null ? authentication.getName() : "auth is null");
-            throw new IllegalStateException("Authentication is null or empty");
-        }
-        String username = authentication.getName();
-
+        String username = AuthHelper.getAuthenticatedUsername();
         // I'm questioning about whether we should get the user here, or
         // can we just use the username??
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> {
-                    logger.error("Username {} not found", username);
-                    return new UserNotFoundException(username);
-                });
+        // =======
+        // well guess what old me? we are going with userHelper...
+        // also yeah we need tho get the user here..
+        // because you said that "yeah let's use username in the JWT. and let the future me deal with UUID part"
+        // so yeah we need the fetch the user here... but at the very least now we are doing it with style lol
+        // t-8-feb-25-00:24 xo
+        User user = userHelper.getUserByUsername(username);
 
-        if (user.getUserRole() == UserRole.REGULAR) {
-            logger.error("User '{}' is regular user", username);
-        }
-
-        Excuse excuse = excuseRepository.findById(id)
-                .orElseThrow(() -> new ExcuseNotFoundException(id));
+        Excuse excuse = excuseHelper.getExcuseById(id);
 
         if (user.getUserRole() == UserRole.MOD
                 && !excuse.getCreatedBy().getId().equals(user.getId())) {
@@ -143,11 +131,9 @@ public class ExcuseV2Service {
         excuseV2Mapper.updateExcuseV2(updateExcuseV2DTO, excuse);
         // anyway I was already going to change the mapper to also set the updatedBy so I'll fix it when I'm refactoring that part
         excuse.setUpdatedBy(user);
-        logger.debug("Updating the excuse to: '{}'", excuse.getExcuseMessage());
 
         Excuse updatedExcuse = excuseRepository.save(excuse);
         logger.debug("User: '{}' with role: {} updated the excuse with id: '{}'", user.getUsername(), user.getUserRole(), updatedExcuse.getId());
-        logger.debug("Excuse updated: {}", updatedExcuse.getId());
 
         return excuseV2Mapper.toExcuseV2DTO(updatedExcuse);
     }
