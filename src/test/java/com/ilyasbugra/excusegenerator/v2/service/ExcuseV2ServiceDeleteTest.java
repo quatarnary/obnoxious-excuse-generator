@@ -110,28 +110,21 @@ public class ExcuseV2ServiceDeleteTest {
     @Test
     public void testDeleteExcuse_Mod_Not_CreatedBySelf() {
         /// Arrange
-        // the ugly not unit testable part... sad developer 😔
-        SecurityContextHolder.setContext(securityContext);
-
-        when(SecurityContextHolder.getContext().getAuthentication())
-                .thenReturn(authentication);
-        when(authentication.getName())
-                .thenReturn(SECOND_MOD_USER.getUsername());
-        when(userRepository.findByUsername(SECOND_MOD_USER.getUsername()))
-                .thenReturn(Optional.of(SECOND_MOD_USER));
-        when(excuseRepository.findById(EXCUSE_ID))
-                .thenReturn(Optional.of(EXCUSE));
-
+        when(userHelper.getAuthenticatedUser())
+                .thenReturn(SECOND_MOD_USER);
+        when(excuseHelper.getExcuseById(EXCUSE_ID))
+                .thenReturn(EXCUSE);
+        doAnswer(invocation -> false)
+                .when(modUser).deleteExcuse(EXCUSE, SECOND_MOD_USER);
         /// Act
         UserNotAuthorized thrown = assertThrows(
                 UserNotAuthorized.class,
                 () -> excuseV2Service.deleteExcuse(EXCUSE_ID)
         );
 
-        verify(SecurityContextHolder.getContext()).getAuthentication();
-        verify(authentication, times(2)).getName();
-        verify(userRepository).findByUsername(SECOND_MOD_USER.getUsername());
-        verify(excuseRepository).findById(EXCUSE_ID);
+        verify(userHelper).getAuthenticatedUser();
+        verify(excuseHelper).getExcuseById(EXCUSE_ID);
+        verify(modUser).deleteExcuse(EXCUSE, SECOND_MOD_USER);
         verify(excuseRepository, times(0)).deleteById(EXCUSE_ID);
 
         /// Assert
