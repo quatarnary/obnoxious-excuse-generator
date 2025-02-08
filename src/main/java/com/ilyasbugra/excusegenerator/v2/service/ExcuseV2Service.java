@@ -50,9 +50,7 @@ public class ExcuseV2Service {
     }
 
     public ExcuseV2DTO getExcuseById(Long id) {
-        Excuse excuse = excuseRepository.findById(id)
-                .orElseThrow(() -> new ExcuseNotFoundException(id));
-
+        Excuse excuse = excuseHelper.getExcuseById(id);
         return excuseV2Mapper.toExcuseV2DTO(excuse);
     }
 
