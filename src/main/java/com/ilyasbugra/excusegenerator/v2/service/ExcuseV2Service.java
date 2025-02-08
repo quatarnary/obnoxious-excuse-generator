@@ -11,7 +11,6 @@ import com.ilyasbugra.excusegenerator.v2.dto.ExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UpdateExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.mapper.ExcuseV2Mapper;
 import com.ilyasbugra.excusegenerator.v2.model.User;
-import com.ilyasbugra.excusegenerator.v2.model.UserRole;
 import com.ilyasbugra.excusegenerator.v2.util.AuthHelper;
 import com.ilyasbugra.excusegenerator.v2.util.ExcuseHelper;
 import com.ilyasbugra.excusegenerator.v2.util.UserHelper;
@@ -48,12 +47,6 @@ public class ExcuseV2Service {
         return excuseV2Mapper.toExcuseV2DTO(excuse);
     }
 
-    // DONE: With paging this setup has to be more efficient but i still have my doubts on whether using findAll (even with paging) is a good approach...
-    // ... but 'till I find a better approach we are going with this... at least now we are not going to fetch 1.6M(the count at the time of writing this comment)
-    // data from the db..
-    // ==================
-    // Only if the past me was here to see how clean this is now.
-    // t-8-feb-25-15:19
     public ExcuseV2DTO getRandomExcuse() {
         return excuseV2Mapper.toExcuseV2DTO(excuseHelper.getRandomExcuse());
     }
@@ -69,7 +62,6 @@ public class ExcuseV2Service {
     public ExcuseV2DTO createExcuse(CreateExcuseV2DTO createExcuseV2DTO) {
         String username = AuthHelper.getAuthenticatedUsername();
         User user = userHelper.getUserByUsername(username);
-
         Excuse excuse = excuseV2Mapper.toExcuse(createExcuseV2DTO);
 
         switch (user.getUserRole()) {
@@ -84,16 +76,7 @@ public class ExcuseV2Service {
 
     public ExcuseV2DTO updateExcuse(Long id, UpdateExcuseV2DTO updateExcuseV2DTO) {
         String username = AuthHelper.getAuthenticatedUsername();
-        // I'm questioning about whether we should get the user here, or
-        // can we just use the username??
-        // =======
-        // well guess what old me? we are going with userHelper...
-        // also yeah we need tho get the user here..
-        // because you said that "yeah let's use username in the JWT. and let the future me deal with UUID part"
-        // so yeah we need the fetch the user here... but at the very least now we are doing it with style lol
-        // t-8-feb-25-00:24 xo
         User user = userHelper.getUserByUsername(username);
-
         Excuse excuse = excuseHelper.getExcuseById(id);
 
         boolean canUpdate = switch (user.getUserRole()) {
@@ -106,33 +89,7 @@ public class ExcuseV2Service {
             throw new UserNotAuthorized(user.getUsername());
         }
 
-        // TODO: how did I thought that mapper returning something for one method and not returning anything would be good
-        // It really happened, the thing people say about you know what your code is doing now but even you are not going
-        // remember what is doing in the future... I was just looking at the line thinking that how did update method was working
-        // T-earlier that what I wrote at the end lol
-        // I'm from few hours future and the more I look at how this mapper is working the more problem I'm seeing
-        // for the sake of my sanity as soon as the update logic ends I'll just change the mapper..
-        // T-25-Jan-2025-19:41
-        // God why! WHYYYYYY!
-        // T-25-jan-2025-21:47
-        // god still why...
-        // t-8-feb-25-01:13
-        // Dear past me.. this is future you speaking.. this is looking better and not confusing
-        // but the future you thinks that there should be a much better way to do it.
-        // however the only remaining part is our past-future convo with comments
-        // so this is the last commit with these comments.. xoxo
-        // t-8-feb-25-16:21
         Excuse modifiedExcuse = excuseV2Mapper.updateExcuseV2(updateExcuseV2DTO, excuse);
-        // anyway I was already going to change the mapper to also set the updatedBy so I'll fix it when I'm refactoring that part
-//        excuse.setUpdatedBy(user);
-        // ========
-        // guess what old me... once again you leave that problem to me...
-        // which was totally right decision. you were dealing with the framework
-        // I'm dealing with the logic...
-        // note to current self: don't try to force something you can't wrap your head around. leave it future self
-        // note to future self: past you is dealing with shit ton of bullshit... be understanding about past decisions
-        // xoxo
-        // t-8-feb-25-01:16
 
         Excuse updatedExcuse = excuseRepository.save(modifiedExcuse);
         logger.debug("User: '{}' with role: {} updated the excuse with id: '{}'", user.getUsername(), user.getUserRole(), updatedExcuse.getId());
@@ -140,20 +97,9 @@ public class ExcuseV2Service {
         return excuseV2Mapper.toExcuseV2DTO(updatedExcuse);
     }
 
-    // Yes I'm just doing copy-paste and I know it is wrong but this will make also the delete work as intendedish for now
-    // the next step is to refactor all of these things, so just bare with me for a sec here
-    // t-25-jan-25-21:53
-    // Yeah it was not a sec but here I am. Doing refactoring. Sorry that it took so long.
-    // t-7-feb-25-23:44
     public void deleteExcuse(Long id) {
         String username = AuthHelper.getAuthenticatedUsername();
         User user = userHelper.getUserByUsername(username);
-
-
-        if (user.getUserRole() == UserRole.REGULAR) {
-            logger.error("User '{}' is regular user", username);
-        }
-
         Excuse excuse = excuseHelper.getExcuseById(id);
 
         boolean canDelete = switch (user.getUserRole()) {
@@ -169,29 +115,9 @@ public class ExcuseV2Service {
         excuseRepository.deleteById(id);
     }
 
-    // Yes another copy-paste
-    // Yes I'll refactor after this
-    // No, I'm not trying to delay it
-    // I want to keep the commits organized
-    // There is no way I'm going to overlook this novel like comments
-    // I mean no way, right? right?
-    //  t-28-jan-2025
-    // approveExcuse confirmation
-    // it is working but currently if an admin approves an already approved excuse, it overwrites it
-    // we should prevent that so that we can do one less write operation...
-    // =====================
-    // Oh I also forgot to add a timestamp comment here
-    // but it feels so good to finally refactor everything.. a little late? well better than never!
-    // xoxo
-    // t-8-feb-25 00:14
     public ExcuseV2DTO approveExcuse(Long id) {
         String username = AuthHelper.getAuthenticatedUsername();
         User user = userHelper.getUserByUsername(username);
-
-        if (user.getUserRole() != UserRole.ADMIN) {
-            logger.error("User '{}' is not an admin user", username);
-        }
-
         Excuse excuse = excuseHelper.getExcuseById(id);
 
         switch (user.getUserRole()) {
