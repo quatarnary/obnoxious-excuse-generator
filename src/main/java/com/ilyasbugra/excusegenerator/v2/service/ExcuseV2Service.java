@@ -10,7 +10,6 @@ import com.ilyasbugra.excusegenerator.v2.dto.ExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UpdateExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.mapper.ExcuseV2Mapper;
 import com.ilyasbugra.excusegenerator.v2.model.User;
-import com.ilyasbugra.excusegenerator.v2.util.AuthHelper;
 import com.ilyasbugra.excusegenerator.v2.util.ExcuseHelper;
 import com.ilyasbugra.excusegenerator.v2.util.UserHelper;
 import org.slf4j.Logger;
@@ -56,8 +55,7 @@ public class ExcuseV2Service {
     }
 
     public ExcuseV2DTO createExcuse(CreateExcuseV2DTO createExcuseV2DTO) {
-        String username = AuthHelper.getAuthenticatedUsername();
-        User user = userHelper.getUserByUsername(username);
+        User user = userHelper.getAuthenticatedUser();
         Excuse excuse = excuseV2Mapper.toExcuse(createExcuseV2DTO);
 
         switch (user.getUserRole()) {
@@ -71,8 +69,7 @@ public class ExcuseV2Service {
     }
 
     public ExcuseV2DTO updateExcuse(Long id, UpdateExcuseV2DTO updateExcuseV2DTO) {
-        String username = AuthHelper.getAuthenticatedUsername();
-        User user = userHelper.getUserByUsername(username);
+        User user = userHelper.getAuthenticatedUser();
         Excuse excuse = excuseHelper.getExcuseById(id);
 
         boolean canUpdate = switch (user.getUserRole()) {
@@ -94,8 +91,7 @@ public class ExcuseV2Service {
     }
 
     public void deleteExcuse(Long id) {
-        String username = AuthHelper.getAuthenticatedUsername();
-        User user = userHelper.getUserByUsername(username);
+        User user = userHelper.getAuthenticatedUser();
         Excuse excuse = excuseHelper.getExcuseById(id);
 
         boolean canDelete = switch (user.getUserRole()) {
@@ -112,8 +108,7 @@ public class ExcuseV2Service {
     }
 
     public ExcuseV2DTO approveExcuse(Long id) {
-        String username = AuthHelper.getAuthenticatedUsername();
-        User user = userHelper.getUserByUsername(username);
+        User user = userHelper.getAuthenticatedUser();
         Excuse excuse = excuseHelper.getExcuseById(id);
 
         switch (user.getUserRole()) {

@@ -14,7 +14,9 @@ public class UserHelper {
         this.userRepository = userRepository;
     }
 
-    public User getUserByUsername(String username) {
+    public User getAuthenticatedUser() {
+        String username = AuthHelper.getAuthenticatedUsername();
+
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(username));
     }
