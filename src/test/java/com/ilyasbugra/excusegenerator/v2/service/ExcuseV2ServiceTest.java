@@ -9,6 +9,7 @@ import com.ilyasbugra.excusegenerator.v2.dto.ExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.mapper.ExcuseV2Mapper;
 import com.ilyasbugra.excusegenerator.v2.model.User;
 import com.ilyasbugra.excusegenerator.v2.model.UserRole;
+import com.ilyasbugra.excusegenerator.v2.util.ExcuseHelper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,6 +29,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ExcuseV2ServiceTest {
+
+    public static final Long EXCUSE_ID_1 = 1L;
+    public static final Long EXCUSE_ID_2 = 2L;
 
     public static final String MESSAGE_1 = "excuse-message-1";
     public static final String MESSAGE_2 = "excuse-message-2";
@@ -54,6 +58,8 @@ public class ExcuseV2ServiceTest {
     Random random;
     @Mock
     ExcuseV2Mapper excuseV2Mapper;
+    @Mock
+    ExcuseHelper excuseHelper;
     @InjectMocks
     ExcuseV2Service excuseV2Service;
 
@@ -108,8 +114,8 @@ public class ExcuseV2ServiceTest {
         Excuse excuse = createExcuses().getFirst();
         ExcuseV2DTO excuseV2DTO = createExcuseV2DTOs(List.of(excuse)).getFirst();
 
-        when(excuseRepository.findById(eq(excuse.getId())))
-                .thenReturn(Optional.of(excuse));
+        when(excuseHelper.getExcuseById(EXCUSE_ID_1))
+                .thenReturn(excuse);
         when(excuseV2Mapper.toExcuseV2DTO(any(Excuse.class)))
                 .thenReturn(excuseV2DTO);
 
@@ -120,7 +126,7 @@ public class ExcuseV2ServiceTest {
         assertNotNull(result);
         assertEquals(excuse.getExcuseMessage(), result.getExcuseMessage());
 
-        verify(excuseRepository).findById(excuse.getId());
+        verify(excuseHelper).getExcuseById(EXCUSE_ID_1);
         verify(excuseV2Mapper, times(1)).toExcuseV2DTO(any(Excuse.class));
     }
 
@@ -266,6 +272,7 @@ public class ExcuseV2ServiceTest {
     private List<Excuse> createExcuses() {
         return List.of(
                 Excuse.builder()
+                        .id(EXCUSE_ID_1)
                         .excuseMessage(MESSAGE_1)
                         .category(CATEGORY)
                         .createdAt(new Date())
@@ -274,6 +281,7 @@ public class ExcuseV2ServiceTest {
                         .updatedAt(new Date())
                         .build(),
                 Excuse.builder()
+                        .id(EXCUSE_ID_2)
                         .excuseMessage(MESSAGE_2)
                         .category(CATEGORY)
                         .createdAt(new Date())
