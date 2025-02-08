@@ -25,14 +25,18 @@ public class ExcuseV2Service {
     private final ExcuseV2Mapper excuseV2Mapper;
     private final UserHelper userHelper;
     private final ExcuseHelper excuseHelper;
+    private final AdminUser adminUser;
+    private final ModUser modUser;
 
     private final Logger logger = LoggerFactory.getLogger(ExcuseV2Service.class);
 
-    public ExcuseV2Service(ExcuseRepository excuseRepository, ExcuseV2Mapper excuseV2Mapper, UserHelper userHelper, ExcuseHelper excuseHelper) {
+    public ExcuseV2Service(ExcuseRepository excuseRepository, ExcuseV2Mapper excuseV2Mapper, UserHelper userHelper, ExcuseHelper excuseHelper, AdminUser adminUser, ModUser modUser) {
         this.excuseRepository = excuseRepository;
         this.excuseV2Mapper = excuseV2Mapper;
         this.userHelper = userHelper;
         this.excuseHelper = excuseHelper;
+        this.adminUser = adminUser;
+        this.modUser = modUser;
     }
 
     public Page<ExcuseV2DTO> getAllExcuses(Pageable pageable) {
@@ -59,8 +63,8 @@ public class ExcuseV2Service {
         Excuse excuse = excuseV2Mapper.toExcuse(createExcuseV2DTO);
 
         switch (user.getUserRole()) {
-            case ADMIN -> new AdminUser().createExcuse(excuse, user);
-            case MOD -> new ModUser().createExcuse(excuse, user);
+            case ADMIN -> adminUser.createExcuse(excuse, user);
+            case MOD -> modUser.createExcuse(excuse, user);
             default -> throw new UserNotAuthorized(user.getUsername());
         }
 
@@ -73,8 +77,8 @@ public class ExcuseV2Service {
         Excuse excuse = excuseHelper.getExcuseById(id);
 
         boolean canUpdate = switch (user.getUserRole()) {
-            case ADMIN -> new AdminUser().updateExcuse(excuse, user);
-            case MOD -> new ModUser().updateExcuse(excuse, user);
+            case ADMIN -> adminUser.updateExcuse(excuse, user);
+            case MOD -> modUser.updateExcuse(excuse, user);
             default -> false;
         };
 
@@ -95,8 +99,8 @@ public class ExcuseV2Service {
         Excuse excuse = excuseHelper.getExcuseById(id);
 
         boolean canDelete = switch (user.getUserRole()) {
-            case ADMIN -> new AdminUser().deleteExcuse();
-            case MOD -> new ModUser().deleteExcuse(excuse, user);
+            case ADMIN -> adminUser.deleteExcuse();
+            case MOD -> modUser.deleteExcuse(excuse, user);
             default -> false;
         };
 
@@ -111,8 +115,8 @@ public class ExcuseV2Service {
         User user = userHelper.getAuthenticatedUser();
         Excuse excuse = excuseHelper.getExcuseById(id);
 
-        switch (user.getUserRole()) {
-            case ADMIN -> new AdminUser().approveExcuse(excuse, user);
+        switch (user.getUserRole()) { // still here for consistency.
+            case ADMIN -> adminUser.approveExcuse(excuse, user);
             default -> throw new UserNotAuthorized(user.getUsername());
         }
 
