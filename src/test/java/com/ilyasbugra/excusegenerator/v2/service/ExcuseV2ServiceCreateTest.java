@@ -4,12 +4,14 @@ import com.ilyasbugra.excusegenerator.exception.UserNotFoundException;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
 import com.ilyasbugra.excusegenerator.util.UserErrorMessages;
+import com.ilyasbugra.excusegenerator.v2.actions.mod.ModUser;
 import com.ilyasbugra.excusegenerator.v2.dto.CreateExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.dto.ExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.mapper.ExcuseV2Mapper;
 import com.ilyasbugra.excusegenerator.v2.model.User;
 import com.ilyasbugra.excusegenerator.v2.model.UserRole;
 import com.ilyasbugra.excusegenerator.v2.repository.UserRepository;
+import com.ilyasbugra.excusegenerator.v2.util.UserHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,6 +49,10 @@ public class ExcuseV2ServiceCreateTest {
     SecurityContext securityContext;
     @Mock
     Authentication authentication;
+    @Mock
+    UserHelper userHelper;
+    @Mock
+    ModUser modUser;
     @InjectMocks
     ExcuseV2Service excuseV2Service;
     private User ADMIN_USER;
@@ -97,17 +103,11 @@ public class ExcuseV2ServiceCreateTest {
     @Test
     public void testCreateExcuse_Mod() {
         /// Arrange
-        // the ugly not unit testable part... sad developer 😔
-        SecurityContextHolder.setContext(securityContext);
-
-        when(securityContext.getAuthentication())
-                .thenReturn(authentication);
-        when(authentication.getName())
-                .thenReturn(MOD_USER.getUsername());
-        when(userRepository.findByUsername(MOD_USER.getUsername()))
-                .thenReturn(Optional.of(MOD_USER));
+        when(userHelper.getAuthenticatedUser())
+                .thenReturn(MOD_USER);
         when(excuseV2Mapper.toExcuse(CREATE_EXCUSE_V2_DTO))
                 .thenReturn(EXCUSE);
+        doNothing().when(modUser).createExcuse(EXCUSE, MOD_USER);
         when(excuseRepository.save(EXCUSE))
                 .thenReturn(EXCUSE);
         when(excuseV2Mapper.toExcuseV2DTO(EXCUSE))
@@ -116,26 +116,18 @@ public class ExcuseV2ServiceCreateTest {
         /// Act
         ExcuseV2DTO result = excuseV2Service.createExcuse(CREATE_EXCUSE_V2_DTO);
 
-        ArgumentCaptor<Excuse> excuseCaptor = ArgumentCaptor.forClass(Excuse.class);
-
-        verify(securityContext, times(1)).getAuthentication();
-        verify(authentication, times(2)).getName();
-        verify(userRepository, times(1)).findByUsername(MOD_USER.getUsername());
-        verify(excuseV2Mapper, times(1)).toExcuse(CREATE_EXCUSE_V2_DTO);
-        verify(excuseRepository, times(1)).save(excuseCaptor.capture());
-        verify(excuseV2Mapper, times(1)).toExcuseV2DTO(EXCUSE);
-
-        Excuse savedExcuse = excuseCaptor.getValue();
+        verify(userHelper).getAuthenticatedUser();
+        verify(excuseV2Mapper).toExcuse(CREATE_EXCUSE_V2_DTO);
+        verify(modUser).createExcuse(EXCUSE, MOD_USER);
+        verify(excuseRepository).save(EXCUSE);
+        verify(excuseV2Mapper).toExcuseV2DTO(EXCUSE);
 
         /// Assert
         assertNotNull(result);
         assertNotNull(result.getId());
         assertNotNull(result.getUpdatedAt());
-        assertNotNull(savedExcuse.getCreatedBy());
         assertEquals(MESSAGE, result.getExcuseMessage());
         assertEquals(CATEGORY, result.getCategory());
-        assertNull(savedExcuse.getApprovedBy());
-        assertEquals(MOD_USER.getUsername(), savedExcuse.getCreatedBy().getUsername());
     }
 
     @Test
