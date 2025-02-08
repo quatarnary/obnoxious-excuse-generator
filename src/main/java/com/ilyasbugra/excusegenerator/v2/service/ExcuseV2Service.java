@@ -1,6 +1,5 @@
 package com.ilyasbugra.excusegenerator.v2.service;
 
-import com.ilyasbugra.excusegenerator.exception.ExcuseCategoryNotFoundException;
 import com.ilyasbugra.excusegenerator.exception.UserNotAuthorized;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
@@ -52,11 +51,8 @@ public class ExcuseV2Service {
     }
 
     public Page<ExcuseV2DTO> getExcusesByCategory(String category, Pageable pageable) {
-        Page<Excuse> excusePage = excuseRepository.findByCategoryStartingWithIgnoreCase(category, pageable);
-
-        if (excusePage.isEmpty()) throw new ExcuseCategoryNotFoundException(category);
-
-        return excusePage.map(excuseV2Mapper::toExcuseV2DTO);
+        return excuseHelper.getExcusesByCategory(category, pageable)
+                .map(excuseV2Mapper::toExcuseV2DTO);
     }
 
     public ExcuseV2DTO createExcuse(CreateExcuseV2DTO createExcuseV2DTO) {
