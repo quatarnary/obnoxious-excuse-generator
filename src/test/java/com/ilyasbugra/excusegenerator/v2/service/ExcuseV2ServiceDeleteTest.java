@@ -4,9 +4,12 @@ import com.ilyasbugra.excusegenerator.exception.UserNotAuthorized;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
 import com.ilyasbugra.excusegenerator.util.UserErrorMessages;
+import com.ilyasbugra.excusegenerator.v2.actions.mod.ModUser;
 import com.ilyasbugra.excusegenerator.v2.model.User;
 import com.ilyasbugra.excusegenerator.v2.model.UserRole;
 import com.ilyasbugra.excusegenerator.v2.repository.UserRepository;
+import com.ilyasbugra.excusegenerator.v2.util.ExcuseHelper;
+import com.ilyasbugra.excusegenerator.v2.util.UserHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +41,12 @@ public class ExcuseV2ServiceDeleteTest {
     UserRepository userRepository;
     @Mock
     ExcuseRepository excuseRepository;
+    @Mock
+    UserHelper userHelper;
+    @Mock
+    ExcuseHelper excuseHelper;
+    @Mock
+    ModUser modUser;
     @InjectMocks
     ExcuseV2Service excuseV2Service;
     private User MOD_USER;
@@ -78,26 +87,21 @@ public class ExcuseV2ServiceDeleteTest {
     @Test
     public void testDeleteExcuse_Mod_CreatedBySelf() {
         /// Arrange
-        // the ugly not unit testable part... sad developer 😔
-        SecurityContextHolder.setContext(securityContext);
-
-        when(SecurityContextHolder.getContext().getAuthentication())
-                .thenReturn(authentication);
-        when(authentication.getName())
-                .thenReturn(MOD_USER.getUsername());
-        when(userRepository.findByUsername(MOD_USER.getUsername()))
-                .thenReturn(Optional.of(MOD_USER));
-        when(excuseRepository.findById(EXCUSE_ID))
-                .thenReturn(Optional.of(EXCUSE));
-        doNothing().when(excuseRepository).deleteById(EXCUSE_ID);
+        when(userHelper.getAuthenticatedUser())
+                .thenReturn(MOD_USER);
+        when(excuseHelper.getExcuseById(EXCUSE_ID))
+                .thenReturn(EXCUSE);
+        doAnswer(invocation -> true)
+                .when(modUser).deleteExcuse(EXCUSE, MOD_USER);
+        doNothing()
+                .when(excuseRepository).deleteById(EXCUSE_ID);
 
         /// Act
         excuseV2Service.deleteExcuse(EXCUSE_ID);
 
-        verify(SecurityContextHolder.getContext()).getAuthentication();
-        verify(authentication, times(2)).getName();
-        verify(userRepository).findByUsername(MOD_USER.getUsername());
-        verify(excuseRepository).findById(EXCUSE_ID);
+        verify(userHelper).getAuthenticatedUser();
+        verify(excuseHelper).getExcuseById(EXCUSE_ID);
+        verify(modUser).deleteExcuse(EXCUSE, MOD_USER);
         verify(excuseRepository).deleteById(EXCUSE_ID);
 
         /// Assert
