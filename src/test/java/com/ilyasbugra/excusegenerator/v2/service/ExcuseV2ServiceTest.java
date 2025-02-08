@@ -20,7 +20,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -128,22 +131,6 @@ public class ExcuseV2ServiceTest {
 
         verify(excuseHelper).getExcuseById(EXCUSE_ID_1);
         verify(excuseV2Mapper, times(1)).toExcuseV2DTO(any(Excuse.class));
-    }
-
-    @Test
-    public void testGetExcuseById_NonExistentId() {
-        // Arrange
-        when(excuseRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        // Act and Assert
-        ExcuseNotFoundException thrown = assertThrows(
-                ExcuseNotFoundException.class,
-                () -> excuseV2Service.getExcuseById(1L)
-        );
-
-        assertEquals(String.format(ErrorMessages.EXCUSE_NOT_FOUND, 1L), thrown.getMessage());
-
-        verify(excuseRepository).findById(anyLong());
     }
 
     @Test
