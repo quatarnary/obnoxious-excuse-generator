@@ -16,5 +16,6 @@ public interface ExcuseV2Mapper {
     @Mapping(target = "id", ignore = true)
     Excuse toExcuse(CreateExcuseV2DTO createExcuseV2DTO);
 
-    void updateExcuseV2(UpdateExcuseV2DTO updateExcuseV2DTO, @MappingTarget Excuse excuse);
+    // Updated to return the modified excuse for consistency in tests
+    Excuse updateExcuseV2(UpdateExcuseV2DTO updateExcuseV2DTO, @MappingTarget Excuse excuse);
 }

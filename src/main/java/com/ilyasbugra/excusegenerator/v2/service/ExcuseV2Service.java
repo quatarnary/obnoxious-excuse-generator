@@ -117,7 +117,12 @@ public class ExcuseV2Service {
         // T-25-jan-2025-21:47
         // god still why...
         // t-8-feb-25-01:13
-        excuseV2Mapper.updateExcuseV2(updateExcuseV2DTO, excuse);
+        // Dear past me.. this is future you speaking.. this is looking better and not confusing
+        // but the future you thinks that there should be a much better way to do it.
+        // however the only remaining part is our past-future convo with comments
+        // so this is the last commit with these comments.. xoxo
+        // t-8-feb-25-16:21
+        Excuse modifiedExcuse = excuseV2Mapper.updateExcuseV2(updateExcuseV2DTO, excuse);
         // anyway I was already going to change the mapper to also set the updatedBy so I'll fix it when I'm refactoring that part
 //        excuse.setUpdatedBy(user);
         // ========
@@ -129,7 +134,7 @@ public class ExcuseV2Service {
         // xoxo
         // t-8-feb-25-01:16
 
-        Excuse updatedExcuse = excuseRepository.save(excuse);
+        Excuse updatedExcuse = excuseRepository.save(modifiedExcuse);
         logger.debug("User: '{}' with role: {} updated the excuse with id: '{}'", user.getUsername(), user.getUserRole(), updatedExcuse.getId());
 
         return excuseV2Mapper.toExcuseV2DTO(updatedExcuse);
