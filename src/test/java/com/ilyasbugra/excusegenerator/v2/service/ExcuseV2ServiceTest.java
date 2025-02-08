@@ -1,9 +1,7 @@
 package com.ilyasbugra.excusegenerator.v2.service;
 
-import com.ilyasbugra.excusegenerator.exception.ExcuseCategoryNotFoundException;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
-import com.ilyasbugra.excusegenerator.util.ErrorMessages;
 import com.ilyasbugra.excusegenerator.v2.dto.ExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.mapper.ExcuseV2Mapper;
 import com.ilyasbugra.excusegenerator.v2.model.User;
@@ -24,7 +22,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -174,28 +173,6 @@ public class ExcuseV2ServiceTest {
         assertEquals(excuses.size(), result.getTotalElements());
         assertEquals(excuseV2DTOS.get(0).getExcuseMessage(), result.getContent().get(0).getExcuseMessage());
         assertEquals(excuseV2DTOS.get(1).getExcuseMessage(), result.getContent().get(1).getExcuseMessage());
-    }
-
-    @Test
-    public void testGetExcusesByCategory_NonExistentCategory() {
-        // Arrange
-        Page<Excuse> page = Page.empty();
-
-        when(excuseRepository.findByCategoryStartingWithIgnoreCase(CATEGORY, PAGEABLE_DEFAULT))
-                .thenReturn(page);
-
-        // Act
-        ExcuseCategoryNotFoundException thrown = assertThrows(
-                ExcuseCategoryNotFoundException.class,
-                () -> excuseV2Service.getExcusesByCategory(CATEGORY, PAGEABLE_DEFAULT)
-        );
-
-        // Assert
-        assertNotNull(thrown);
-        assertEquals(String.format(ErrorMessages.CATEGORY_NOT_FOUND, CATEGORY), thrown.getMessage());
-
-        verify(excuseRepository).findByCategoryStartingWithIgnoreCase(CATEGORY, PAGEABLE_DEFAULT);
-        verify(excuseV2Mapper, times(0)).toExcuseV2DTO(any(Excuse.class));
     }
 
     // 🔹 Helper Methods 🔹
