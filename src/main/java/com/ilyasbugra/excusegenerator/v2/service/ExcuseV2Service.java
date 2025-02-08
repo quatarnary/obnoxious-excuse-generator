@@ -21,22 +21,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Random;
-
 @Service
 public class ExcuseV2Service {
 
     private final ExcuseRepository excuseRepository;
-    private final Random random;
     private final ExcuseV2Mapper excuseV2Mapper;
     private final UserHelper userHelper;
     private final ExcuseHelper excuseHelper;
 
     private final Logger logger = LoggerFactory.getLogger(ExcuseV2Service.class);
 
-    public ExcuseV2Service(ExcuseRepository excuseRepository, Random random, ExcuseV2Mapper excuseV2Mapper, UserHelper userHelper, ExcuseHelper excuseHelper) {
+    public ExcuseV2Service(ExcuseRepository excuseRepository, ExcuseV2Mapper excuseV2Mapper, UserHelper userHelper, ExcuseHelper excuseHelper) {
         this.excuseRepository = excuseRepository;
-        this.random = random;
         this.excuseV2Mapper = excuseV2Mapper;
         this.userHelper = userHelper;
         this.excuseHelper = excuseHelper;
