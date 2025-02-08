@@ -136,20 +136,13 @@ public class ExcuseV2ServiceTest {
     @Test
     public void testGetRandomExcuse() {
         // Arrange
-        int pageSize = 1;
-        Long pageCount = 10L;
-        int randomBound = 10;
-        int randomPage = 1;
-
         Excuse excuse = createExcuses().getFirst();
-        Pageable pageable = PageRequest.of(randomPage, pageSize);
-        Page<Excuse> page = new PageImpl<>(List.of(excuse), pageable, 1);
         ExcuseV2DTO excuseV2DTO = createExcuseV2DTOs(List.of(excuse)).getFirst();
 
-        when(excuseRepository.count()).thenReturn(pageCount);
-        when(random.nextInt(randomBound)).thenReturn(randomPage);
-        when(excuseRepository.findAll(any(PageRequest.class))).thenReturn(page);
-        when(excuseV2Mapper.toExcuseV2DTO(any(Excuse.class))).thenReturn(excuseV2DTO);
+        when(excuseHelper.getRandomExcuse())
+                .thenReturn(excuse);
+        when(excuseV2Mapper.toExcuseV2DTO(any(Excuse.class)))
+                .thenReturn(excuseV2DTO);
 
         // Act
         ExcuseV2DTO result = excuseV2Service.getRandomExcuse();
@@ -158,10 +151,8 @@ public class ExcuseV2ServiceTest {
         assertNotNull(result);
         assertEquals(excuse.getExcuseMessage(), result.getExcuseMessage());
 
-        verify(excuseRepository).count();
-        verify(random).nextInt(randomBound);
-        verify(excuseRepository).findAll(any(PageRequest.class));
-        verify(excuseV2Mapper, times(1)).toExcuseV2DTO(any(Excuse.class));
+        verify(excuseHelper).getRandomExcuse();
+        verify(excuseV2Mapper).toExcuseV2DTO(any(Excuse.class));
     }
 
     @Test
