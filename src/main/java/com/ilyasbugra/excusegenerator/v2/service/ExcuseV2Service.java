@@ -96,12 +96,6 @@ public class ExcuseV2Service {
 
         Excuse excuse = excuseHelper.getExcuseById(id);
 
-        if (user.getUserRole() == UserRole.MOD
-                && !excuse.getCreatedBy().getId().equals(user.getId())) {
-            logger.debug("User '{}' tried to update with role '{}'", user.getUsername(), user.getUserRole());
-            throw new UserNotAuthorized(user.getUsername());
-        }
-
         boolean canUpdate = switch (user.getUserRole()) {
             case ADMIN -> new AdminUser().updateExcuse(excuse, user);
             case MOD -> new ModUser().updateExcuse(excuse, user);
