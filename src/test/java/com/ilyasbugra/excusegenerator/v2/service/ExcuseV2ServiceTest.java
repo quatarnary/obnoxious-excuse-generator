@@ -1,7 +1,6 @@
 package com.ilyasbugra.excusegenerator.v2.service;
 
 import com.ilyasbugra.excusegenerator.exception.ExcuseCategoryNotFoundException;
-import com.ilyasbugra.excusegenerator.exception.ExcuseNotFoundException;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
 import com.ilyasbugra.excusegenerator.util.ErrorMessages;
@@ -22,7 +21,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -57,8 +55,6 @@ public class ExcuseV2ServiceTest {
 
     @Mock
     ExcuseRepository excuseRepository;
-    @Mock
-    Random random;
     @Mock
     ExcuseV2Mapper excuseV2Mapper;
     @Mock
@@ -153,49 +149,6 @@ public class ExcuseV2ServiceTest {
 
         verify(excuseHelper).getRandomExcuse();
         verify(excuseV2Mapper).toExcuseV2DTO(any(Excuse.class));
-    }
-
-    @Test
-    public void testGetRandomExcuse_EmptyDatabase() {
-        // Arrange
-        when(excuseRepository.count()).thenReturn(0L);
-
-        // Act and Assert
-        ExcuseNotFoundException thrown = assertThrows(
-                ExcuseNotFoundException.class,
-                () -> excuseV2Service.getRandomExcuse()
-        );
-
-        assertEquals(String.format(ErrorMessages.EXCUSE_NOT_FOUND, 0L), thrown.getMessage());
-
-        verify(excuseRepository).count();
-    }
-
-    @Test
-    public void testGetRandomExcuse_EmptyPage() {
-        // Arrange
-        Long pageCount = 10L;
-        int randomBound = 10;
-        int randomPage = 1;
-
-        Page<Excuse> page = Page.empty();
-
-        when(excuseRepository.count()).thenReturn(pageCount);
-        when(random.nextInt(randomBound)).thenReturn(randomPage);
-        when(excuseRepository.findAll(any(PageRequest.class))).thenReturn(page);
-
-        // Act
-        ExcuseNotFoundException thrown = assertThrows(
-                ExcuseNotFoundException.class,
-                () -> excuseV2Service.getRandomExcuse()
-        );
-
-        // Assert
-        assertEquals(String.format(ErrorMessages.EXCUSE_NOT_FOUND, 0L), thrown.getMessage());
-
-        verify(excuseRepository).count();
-        verify(random).nextInt(randomBound);
-        verify(excuseRepository).findAll(any(PageRequest.class));
     }
 
     @Test
