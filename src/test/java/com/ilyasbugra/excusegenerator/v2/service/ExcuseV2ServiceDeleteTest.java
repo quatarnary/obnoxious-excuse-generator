@@ -7,6 +7,7 @@ import com.ilyasbugra.excusegenerator.util.UserErrorMessages;
 import com.ilyasbugra.excusegenerator.v2.model.User;
 import com.ilyasbugra.excusegenerator.v2.model.UserRole;
 import com.ilyasbugra.excusegenerator.v2.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,40 +27,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class ExcuseV2ServiceDeleteTest {
 
-    public static final UUID MOD_USER_ID = UUID.randomUUID();
-    public static final UUID SECOND_MOD_USER_ID = UUID.randomUUID();
-    public static final UUID ADMIN_USER_ID = UUID.randomUUID();
-
     public static final Long EXCUSE_ID = 0L;
     public static final String MESSAGE = "excuse-message";
     public static final String CATEGORY = "category";
-
-    private static final User MOD_USER = User.builder()
-            .id(MOD_USER_ID)
-            .username("mod-lololololol")
-            .password("password-go-brrrrrr")
-            .userRole(UserRole.MOD)
-            .build();
-    public static final Excuse EXCUSE = Excuse.builder()
-            .id(EXCUSE_ID)
-            .excuseMessage(MESSAGE)
-            .category(CATEGORY)
-            .createdBy(MOD_USER)
-            .createdAt(new Date())
-            .updatedAt(new Date())
-            .build();
-    private static final User SECOND_MOD_USER = User.builder()
-            .id(SECOND_MOD_USER_ID)
-            .username("imma-be-second-mod-lololololol")
-            .password("password-go-brrrrrr")
-            .userRole(UserRole.MOD)
-            .build();
-    private static final User ADMIN_USER = User.builder()
-            .id(ADMIN_USER_ID)
-            .username("admin-lololololol")
-            .password("password-go-brrrrrr")
-            .userRole(UserRole.ADMIN)
-            .build();
     @Mock
     Authentication authentication;
     @Mock
@@ -68,9 +38,42 @@ public class ExcuseV2ServiceDeleteTest {
     UserRepository userRepository;
     @Mock
     ExcuseRepository excuseRepository;
-
     @InjectMocks
     ExcuseV2Service excuseV2Service;
+    private User MOD_USER;
+    private Excuse EXCUSE;
+    private User SECOND_MOD_USER;
+    private User ADMIN_USER;
+
+    @BeforeEach
+    void setUp() {
+        MOD_USER = User.builder()
+                .id(UUID.randomUUID())
+                .username("mod-lololololol")
+                .password("password-go-brrrrrr")
+                .userRole(UserRole.MOD)
+                .build();
+        EXCUSE = Excuse.builder()
+                .id(EXCUSE_ID)
+                .excuseMessage(MESSAGE)
+                .category(CATEGORY)
+                .createdBy(MOD_USER)
+                .createdAt(new Date())
+                .updatedAt(new Date())
+                .build();
+        SECOND_MOD_USER = User.builder()
+                .id(UUID.randomUUID())
+                .username("imma-be-second-mod-lololololol")
+                .password("password-go-brrrrrr")
+                .userRole(UserRole.MOD)
+                .build();
+        ADMIN_USER = User.builder()
+                .id(UUID.randomUUID())
+                .username("admin-lololololol")
+                .password("password-go-brrrrrr")
+                .userRole(UserRole.ADMIN)
+                .build();
+    }
 
     @Test
     public void testDeleteExcuse_Mod_CreatedBySelf() {
