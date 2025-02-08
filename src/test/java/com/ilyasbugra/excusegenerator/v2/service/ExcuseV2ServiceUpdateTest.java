@@ -159,17 +159,12 @@ public class ExcuseV2ServiceUpdateTest {
     @Test
     public void testUpdateExcuse_Mod_Not_CreatedBySelf() {
         /// Arrange
-        // the ugly not unit testable part... sad developer 😔
-        SecurityContextHolder.setContext(securityContext);
-
-        when(SecurityContextHolder.getContext().getAuthentication())
-                .thenReturn(authentication);
-        when(authentication.getName())
-                .thenReturn(SECOND_MOD_USER.getUsername());
-        when(userRepository.findByUsername(SECOND_MOD_USER.getUsername()))
-                .thenReturn(Optional.of(SECOND_MOD_USER));
-        when(excuseRepository.findById(EXCUSE_ID))
-                .thenReturn(Optional.of(EXCUSE));
+        when(userHelper.getAuthenticatedUser())
+                .thenReturn(SECOND_MOD_USER);
+        when(excuseHelper.getExcuseById(EXCUSE_ID))
+                .thenReturn(EXCUSE);
+        doAnswer(invocation -> false)
+                .when(modUser).updateExcuse(EXCUSE, SECOND_MOD_USER);
 
         /// Act
         UserNotAuthorized thrown = assertThrows(
@@ -177,10 +172,9 @@ public class ExcuseV2ServiceUpdateTest {
                 () -> excuseV2Service.updateExcuse(EXCUSE_ID, UPDATE_EXCUSE_V2_DTO)
         );
 
-        verify(SecurityContextHolder.getContext()).getAuthentication();
-        verify(authentication, times(2)).getName();
-        verify(userRepository).findByUsername(SECOND_MOD_USER.getUsername());
-        verify(excuseRepository).findById(EXCUSE_ID);
+        verify(userHelper).getAuthenticatedUser();
+        verify(excuseHelper).getExcuseById(EXCUSE_ID);
+        verify(modUser).updateExcuse(EXCUSE, SECOND_MOD_USER);
         verify(excuseV2Mapper, times(0)).updateExcuseV2(UPDATE_EXCUSE_V2_DTO, EXCUSE);
 
         /// Assert
