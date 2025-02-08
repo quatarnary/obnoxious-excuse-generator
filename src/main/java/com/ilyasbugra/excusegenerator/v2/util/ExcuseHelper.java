@@ -18,4 +18,10 @@ public class ExcuseHelper {
         return excuseRepository.findById(id)
                 .orElseThrow(() -> new ExcuseNotFoundException(id));
     }
+
+    public Excuse getRandomExcuse() {
+        Excuse excuse = excuseRepository.findRandomExcuse();
+        if (excuse == null) throw new ExcuseNotFoundException(0L);
+        return excuse;
+    }
 }

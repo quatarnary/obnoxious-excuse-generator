@@ -4,6 +4,7 @@ import com.ilyasbugra.excusegenerator.model.Excuse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
@@ -29,4 +30,7 @@ public interface ExcuseRepository extends JpaRepository<Excuse, Long> {
     }
 
     Page<Excuse> findByCategoryStartingWithIgnoreCaseAndApprovedByIsNotNull(String category, Pageable pageable);
+
+    @Query(value = "SELECT * FROM excuses WHERE approved_by IS NOT NULL ORDER BY RANDOM() LIMIT 1", nativeQuery = true)
+    Excuse findRandomExcuse();
 }

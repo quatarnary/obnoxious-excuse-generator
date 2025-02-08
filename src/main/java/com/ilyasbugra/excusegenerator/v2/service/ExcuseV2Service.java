@@ -1,7 +1,6 @@
 package com.ilyasbugra.excusegenerator.v2.service;
 
 import com.ilyasbugra.excusegenerator.exception.ExcuseCategoryNotFoundException;
-import com.ilyasbugra.excusegenerator.exception.ExcuseNotFoundException;
 import com.ilyasbugra.excusegenerator.exception.UserNotAuthorized;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
@@ -19,7 +18,6 @@ import com.ilyasbugra.excusegenerator.v2.util.UserHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -54,20 +52,14 @@ public class ExcuseV2Service {
         return excuseV2Mapper.toExcuseV2DTO(excuse);
     }
 
-    // TODO: With paging this setup has to be more efficient but i still have my doubts on whether using findAll (even with paging) is a good approach...
+    // DONE: With paging this setup has to be more efficient but i still have my doubts on whether using findAll (even with paging) is a good approach...
     // ... but 'till I find a better approach we are going with this... at least now we are not going to fetch 1.6M(the count at the time of writing this comment)
     // data from the db..
+    // ==================
+    // Only if the past me was here to see how clean this is now.
+    // t-8-feb-25-15:19
     public ExcuseV2DTO getRandomExcuse() {
-        final int pageSize = 1;
-        long count = excuseRepository.count();
-        if (count == 0) throw new ExcuseNotFoundException(0L);
-
-        // for the random we don't need the (count / pageSize) cast but this is the general usage and I want to get used seeing this...
-        int randomPage = random.nextInt((int) Math.ceil((double) count / pageSize));
-        Page<Excuse> page = excuseRepository.findAll(PageRequest.of(randomPage, pageSize));
-
-        if (!page.hasContent()) throw new ExcuseNotFoundException(0L);
-        return excuseV2Mapper.toExcuseV2DTO(page.getContent().getFirst());
+        return excuseV2Mapper.toExcuseV2DTO(excuseHelper.getRandomExcuse());
     }
 
     public Page<ExcuseV2DTO> getExcusesByCategory(String category, Pageable pageable) {
