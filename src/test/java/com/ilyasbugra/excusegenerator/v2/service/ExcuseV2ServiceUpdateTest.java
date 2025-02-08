@@ -10,6 +10,7 @@ import com.ilyasbugra.excusegenerator.v2.mapper.ExcuseV2Mapper;
 import com.ilyasbugra.excusegenerator.v2.model.User;
 import com.ilyasbugra.excusegenerator.v2.model.UserRole;
 import com.ilyasbugra.excusegenerator.v2.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,52 +31,16 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class ExcuseV2ServiceUpdateTest {
 
-    public static final UUID MOD_USER_ID = UUID.randomUUID();
-    public static final UUID SECOND_MOD_USER_ID = UUID.randomUUID();
-    public static final UUID ADMIN_USER_ID = UUID.randomUUID();
-
     public static final Long EXCUSE_ID = 0L;
     public static final String MESSAGE = "excuse-message";
     public static final String CATEGORY = "category";
-
     public static final String UPDATE_MESSAGE = "updated-message";
     public static final String UPDATE_CATEGORY = "updated-category";
-    public static final UpdateExcuseV2DTO UPDATE_EXCUSE_V2_DTO = UpdateExcuseV2DTO.builder()
-            .excuseMessage(UPDATE_MESSAGE)
-            .category(UPDATE_CATEGORY)
-            .build();
-    private static final User MOD_USER = User.builder()
-            .id(MOD_USER_ID)
-            .username("mod-lololololol")
-            .password("password-go-brrrrrr")
-            .userRole(UserRole.MOD)
-            .build();
-    public static final Excuse EXCUSE = Excuse.builder()
-            .id(EXCUSE_ID)
-            .excuseMessage(MESSAGE)
-            .category(CATEGORY)
-            .createdBy(MOD_USER)
-            .createdAt(new Date())
-            .updatedAt(new Date())
-            .build();
-    public static final ExcuseV2DTO EXCUSE_V2_DTO = ExcuseV2DTO.builder()
-            .id(EXCUSE.getId())
-            .excuseMessage(EXCUSE.getExcuseMessage())
-            .category(EXCUSE.getCategory())
-            .updatedAt(EXCUSE.getUpdatedAt())
-            .build();
-    private static final User SECOND_MOD_USER = User.builder()
-            .id(SECOND_MOD_USER_ID)
-            .username("imma-be-second-mod-lololololol")
-            .password("password-go-brrrrrr")
-            .userRole(UserRole.MOD)
-            .build();
-    private static final User ADMIN_USER = User.builder()
-            .id(ADMIN_USER_ID)
-            .username("admin-lololololol")
-            .password("password-go-brrrrrr")
-            .userRole(UserRole.ADMIN)
-            .build();
+
+    public UpdateExcuseV2DTO UPDATE_EXCUSE_V2_DTO;
+    public Excuse EXCUSE;
+    public ExcuseV2DTO EXCUSE_V2_DTO;
+
     @Mock
     SecurityContext securityContext;
     @Mock
@@ -86,9 +51,57 @@ public class ExcuseV2ServiceUpdateTest {
     ExcuseRepository excuseRepository;
     @Mock
     ExcuseV2Mapper excuseV2Mapper;
-
     @InjectMocks
     ExcuseV2Service excuseV2Service;
+
+    private User MOD_USER;
+    private User SECOND_MOD_USER;
+    private User ADMIN_USER;
+
+    @BeforeEach
+    void setUp() {
+        MOD_USER = User.builder()
+                .id(UUID.randomUUID())  // Unique ID per test
+                .username("mod-lololololol")
+                .password("password-go-brrrrrr")
+                .userRole(UserRole.MOD)
+                .build();
+
+        SECOND_MOD_USER = User.builder()
+                .id(UUID.randomUUID())  // Unique ID per test
+                .username("imma-be-second-mod-lololololol")
+                .password("password-go-brrrrrr")
+                .userRole(UserRole.MOD)
+                .build();
+
+        ADMIN_USER = User.builder()
+                .id(UUID.randomUUID())  // Unique ID per test
+                .username("admin-lololololol")
+                .password("password-go-brrrrrr")
+                .userRole(UserRole.ADMIN)
+                .build();
+
+        EXCUSE = Excuse.builder()
+                .id(EXCUSE_ID)
+                .excuseMessage(MESSAGE)
+                .category(CATEGORY)
+                .createdBy(MOD_USER)
+                .createdAt(new Date())
+                .updatedAt(new Date())
+                .build();
+
+        EXCUSE_V2_DTO = ExcuseV2DTO.builder()
+                .id(EXCUSE.getId())
+                .excuseMessage(EXCUSE.getExcuseMessage())
+                .category(EXCUSE.getCategory())
+                .updatedAt(EXCUSE.getUpdatedAt())
+                .build();
+
+        UPDATE_EXCUSE_V2_DTO = UpdateExcuseV2DTO.builder()
+                .excuseMessage(UPDATE_MESSAGE)
+                .category(UPDATE_CATEGORY)
+                .build();
+    }
 
     @Test
     public void testUpdateExcuse_Mod_CreatedBySelf() {
@@ -141,7 +154,7 @@ public class ExcuseV2ServiceUpdateTest {
         assertEquals(EXCUSE_ID, updatedExcuse.getId());
         assertEquals(UPDATE_MESSAGE, updatedExcuse.getExcuseMessage());
         assertEquals(UPDATE_CATEGORY, updatedExcuse.getCategory());
-        assertEquals(MOD_USER_ID, updatedExcuse.getUpdatedBy().getId());
+        assertEquals(MOD_USER.getId(), updatedExcuse.getUpdatedBy().getId());
         assertEquals(EXCUSE.getCreatedBy().getId(), updatedExcuse.getCreatedBy().getId());
     }
 
@@ -228,7 +241,7 @@ public class ExcuseV2ServiceUpdateTest {
         assertEquals(EXCUSE_ID, updatedExcuse.getId());
         assertEquals(UPDATE_MESSAGE, updatedExcuse.getExcuseMessage());
         assertEquals(UPDATE_CATEGORY, updatedExcuse.getCategory());
-        assertEquals(ADMIN_USER_ID, updatedExcuse.getUpdatedBy().getId());
+        assertEquals(ADMIN_USER.getId(), updatedExcuse.getUpdatedBy().getId());
         assertEquals(EXCUSE.getCreatedBy().getId(), updatedExcuse.getCreatedBy().getId());
         assertNotEquals(updatedExcuse.getCreatedBy().getId(), updatedExcuse.getUpdatedBy().getId());
     }
