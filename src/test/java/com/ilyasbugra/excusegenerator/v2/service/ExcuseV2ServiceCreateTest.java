@@ -10,6 +10,7 @@ import com.ilyasbugra.excusegenerator.v2.mapper.ExcuseV2Mapper;
 import com.ilyasbugra.excusegenerator.v2.model.User;
 import com.ilyasbugra.excusegenerator.v2.model.UserRole;
 import com.ilyasbugra.excusegenerator.v2.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,40 +31,12 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class ExcuseV2ServiceCreateTest {
 
+    public static final Long EXCUSE_ID = 0L;
     public static final String MESSAGE = "excuse-message";
     public static final String CATEGORY = "category";
-    public static final Excuse EXCUSE = Excuse.builder()
-            .id(0L)
-            .excuseMessage(MESSAGE)
-            .category(CATEGORY)
-            .createdAt(new Date())
-            .updatedAt(new Date())
-            .build();
-    public static final ExcuseV2DTO EXCUSE_V2_DTO = ExcuseV2DTO.builder()
-            .id(EXCUSE.getId())
-            .excuseMessage(EXCUSE.getExcuseMessage())
-            .category(EXCUSE.getCategory())
-            .updatedAt(EXCUSE.getUpdatedAt())
-            .build();
-    public static final CreateExcuseV2DTO CREATE_EXCUSE_V2_DTO = CreateExcuseV2DTO.builder()
-            .excuseMessage(MESSAGE)
-            .category(CATEGORY)
-            .build();
-
-    private static final User ADMIN_USER = User.builder()
-            .id(UUID.randomUUID())
-            .username("admin-lololololol")
-            .password("password-go-brrrrrr")
-            .userRole(UserRole.ADMIN)
-            .build();
-    private static final User MOD_USER = User.builder()
-            .id(UUID.randomUUID())
-            .username("mod-lololololol")
-            .password("password-go-brrrrrr")
-            .userRole(UserRole.MOD)
-            .build();
-
-
+    public Excuse EXCUSE;
+    public ExcuseV2DTO EXCUSE_V2_DTO;
+    public CreateExcuseV2DTO CREATE_EXCUSE_V2_DTO;
     @Mock
     ExcuseRepository excuseRepository;
     @Mock
@@ -74,9 +47,47 @@ public class ExcuseV2ServiceCreateTest {
     SecurityContext securityContext;
     @Mock
     Authentication authentication;
-
     @InjectMocks
     ExcuseV2Service excuseV2Service;
+    private User ADMIN_USER;
+    private User MOD_USER;
+
+    @BeforeEach
+    void setUp() {
+        EXCUSE = Excuse.builder()
+                .id(EXCUSE_ID)
+                .excuseMessage(MESSAGE)
+                .category(CATEGORY)
+                .createdAt(new Date())
+                .updatedAt(new Date())
+                .build();
+
+        EXCUSE_V2_DTO = ExcuseV2DTO.builder()
+                .id(EXCUSE.getId())
+                .excuseMessage(EXCUSE.getExcuseMessage())
+                .category(EXCUSE.getCategory())
+                .updatedAt(EXCUSE.getUpdatedAt())
+                .build();
+
+        CREATE_EXCUSE_V2_DTO = CreateExcuseV2DTO.builder()
+                .excuseMessage(MESSAGE)
+                .category(CATEGORY)
+                .build();
+
+        ADMIN_USER = User.builder()
+                .id(UUID.randomUUID()) // Ensures fresh UUID per test
+                .username("admin-lololololol")
+                .password("password-go-brrrrrr")
+                .userRole(UserRole.ADMIN)
+                .build();
+
+        MOD_USER = User.builder()
+                .id(UUID.randomUUID()) // Ensures fresh UUID per test
+                .username("mod-lololololol")
+                .password("password-go-brrrrrr")
+                .userRole(UserRole.MOD)
+                .build();
+    }
 
     // ⚠️ WARNING: THIS TEST SUITE IS FOR THE CURRENT "PAIN" VERSION ⚠️
     // Once we refactor ExcuseV2Service into a cleaner, more DDD-based structure,
