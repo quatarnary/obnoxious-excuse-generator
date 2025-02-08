@@ -4,12 +4,15 @@ import com.ilyasbugra.excusegenerator.exception.UserNotAuthorized;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
 import com.ilyasbugra.excusegenerator.util.UserErrorMessages;
+import com.ilyasbugra.excusegenerator.v2.actions.mod.ModUser;
 import com.ilyasbugra.excusegenerator.v2.dto.ExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UpdateExcuseV2DTO;
 import com.ilyasbugra.excusegenerator.v2.mapper.ExcuseV2Mapper;
 import com.ilyasbugra.excusegenerator.v2.model.User;
 import com.ilyasbugra.excusegenerator.v2.model.UserRole;
 import com.ilyasbugra.excusegenerator.v2.repository.UserRepository;
+import com.ilyasbugra.excusegenerator.v2.util.ExcuseHelper;
+import com.ilyasbugra.excusegenerator.v2.util.UserHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +42,7 @@ public class ExcuseV2ServiceUpdateTest {
 
     public UpdateExcuseV2DTO UPDATE_EXCUSE_V2_DTO;
     public Excuse EXCUSE;
+    public Excuse MODIFIED_EXCUSE;
     public ExcuseV2DTO EXCUSE_V2_DTO;
 
     @Mock
@@ -51,6 +55,12 @@ public class ExcuseV2ServiceUpdateTest {
     ExcuseRepository excuseRepository;
     @Mock
     ExcuseV2Mapper excuseV2Mapper;
+    @Mock
+    UserHelper userHelper;
+    @Mock
+    ExcuseHelper excuseHelper;
+    @Mock
+    ModUser modUser;
     @InjectMocks
     ExcuseV2Service excuseV2Service;
 
@@ -90,11 +100,20 @@ public class ExcuseV2ServiceUpdateTest {
                 .updatedAt(new Date())
                 .build();
 
+        MODIFIED_EXCUSE = Excuse.builder()
+                .id(EXCUSE_ID)
+                .excuseMessage(UPDATE_MESSAGE)
+                .category(UPDATE_CATEGORY)
+                .createdBy(MOD_USER)
+                .createdAt(new Date())
+                .updatedAt(new Date())
+                .build();
+
         EXCUSE_V2_DTO = ExcuseV2DTO.builder()
-                .id(EXCUSE.getId())
-                .excuseMessage(EXCUSE.getExcuseMessage())
-                .category(EXCUSE.getCategory())
-                .updatedAt(EXCUSE.getUpdatedAt())
+                .id(MODIFIED_EXCUSE.getId())
+                .excuseMessage(MODIFIED_EXCUSE.getExcuseMessage())
+                .category(MODIFIED_EXCUSE.getCategory())
+                .updatedAt(MODIFIED_EXCUSE.getUpdatedAt())
                 .build();
 
         UPDATE_EXCUSE_V2_DTO = UpdateExcuseV2DTO.builder()
@@ -106,56 +125,35 @@ public class ExcuseV2ServiceUpdateTest {
     @Test
     public void testUpdateExcuse_Mod_CreatedBySelf() {
         /// Arrange
-        // the ugly not unit testable part... sad developer 😔
-        SecurityContextHolder.setContext(securityContext);
-
-        when(SecurityContextHolder.getContext().getAuthentication())
-                .thenReturn(authentication);
-        when(authentication.getName())
-                .thenReturn(MOD_USER.getUsername());
-        when(userRepository.findByUsername(MOD_USER.getUsername()))
-                .thenReturn(Optional.of(MOD_USER));
-        when(excuseRepository.findById(EXCUSE_ID))
-                .thenReturn(Optional.of(EXCUSE));
-        doAnswer(invocation -> {
-            UpdateExcuseV2DTO mapperUpdateExcuseV2DTO = invocation.getArgument(0);
-            Excuse mapperExcuse = invocation.getArgument(1);
-
-            mapperExcuse.setExcuseMessage(mapperUpdateExcuseV2DTO.getExcuseMessage());
-            mapperExcuse.setCategory(mapperUpdateExcuseV2DTO.getCategory());
-
-            EXCUSE.setExcuseMessage(mapperUpdateExcuseV2DTO.getExcuseMessage());
-            EXCUSE.setCategory(mapperUpdateExcuseV2DTO.getCategory());
-
-            return null;
-        }).when(excuseV2Mapper).updateExcuseV2(UPDATE_EXCUSE_V2_DTO, EXCUSE);
-        when(excuseRepository.save(EXCUSE))
+        when(userHelper.getAuthenticatedUser())
+                .thenReturn(MOD_USER);
+        when(excuseHelper.getExcuseById(EXCUSE_ID))
                 .thenReturn(EXCUSE);
-        when(excuseV2Mapper.toExcuseV2DTO(EXCUSE))
+        doAnswer(invocation -> true)
+                .when(modUser).updateExcuse(EXCUSE, MOD_USER);
+        when(excuseV2Mapper.updateExcuseV2(UPDATE_EXCUSE_V2_DTO, EXCUSE))
+                .thenReturn(MODIFIED_EXCUSE);
+        when(excuseRepository.save(MODIFIED_EXCUSE))
+                .thenReturn(MODIFIED_EXCUSE);
+        when(excuseV2Mapper.toExcuseV2DTO(MODIFIED_EXCUSE))
                 .thenReturn(EXCUSE_V2_DTO);
 
         /// Act
         ExcuseV2DTO result = excuseV2Service.updateExcuse(EXCUSE_ID, UPDATE_EXCUSE_V2_DTO);
 
-        ArgumentCaptor<Excuse> excuseCaptor = ArgumentCaptor.forClass(Excuse.class);
-
-        verify(SecurityContextHolder.getContext()).getAuthentication();
-        verify(authentication, times(2)).getName();
-        verify(userRepository).findByUsername(MOD_USER.getUsername());
-        verify(excuseRepository).findById(EXCUSE_ID);
+        verify(userHelper).getAuthenticatedUser();
+        verify(excuseHelper).getExcuseById(EXCUSE_ID);
+        verify(modUser).updateExcuse(EXCUSE, MOD_USER);
         verify(excuseV2Mapper).updateExcuseV2(UPDATE_EXCUSE_V2_DTO, EXCUSE);
-        verify(excuseRepository).save(excuseCaptor.capture());
-        verify(excuseV2Mapper).toExcuseV2DTO(EXCUSE);
-
-        Excuse updatedExcuse = excuseCaptor.getValue();
+        verify(excuseRepository).save(MODIFIED_EXCUSE);
+        verify(excuseV2Mapper).toExcuseV2DTO(MODIFIED_EXCUSE);
 
         /// Assert
         assertNotNull(result);
-        assertEquals(EXCUSE_ID, updatedExcuse.getId());
-        assertEquals(UPDATE_MESSAGE, updatedExcuse.getExcuseMessage());
-        assertEquals(UPDATE_CATEGORY, updatedExcuse.getCategory());
-        assertEquals(MOD_USER.getId(), updatedExcuse.getUpdatedBy().getId());
-        assertEquals(EXCUSE.getCreatedBy().getId(), updatedExcuse.getCreatedBy().getId());
+        assertNotNull(result.getId());
+        assertEquals(MODIFIED_EXCUSE.getId(), result.getId());
+        assertEquals(MODIFIED_EXCUSE.getExcuseMessage(), result.getExcuseMessage());
+        assertEquals(MODIFIED_EXCUSE.getCategory(), result.getCategory());
     }
 
     @Test
