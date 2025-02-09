@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator.security;
+package com.ilyasbugra.excusegenerator.infrastructure.security;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;

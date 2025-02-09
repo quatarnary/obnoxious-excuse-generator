@@ -1,7 +1,7 @@
-package com.ilyasbugra.excusegenerator.config;
+package com.ilyasbugra.excusegenerator.infrastructure.config;
 
-import com.ilyasbugra.excusegenerator.security.JwtAuthenticationFilter;
-import com.ilyasbugra.excusegenerator.security.JwtUtil;
+import com.ilyasbugra.excusegenerator.infrastructure.security.JwtAuthenticationFilter;
+import com.ilyasbugra.excusegenerator.infrastructure.security.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

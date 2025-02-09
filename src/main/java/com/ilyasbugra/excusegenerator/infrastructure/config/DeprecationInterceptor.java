@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator.config;
+package com.ilyasbugra.excusegenerator.infrastructure.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator.security;
+package com.ilyasbugra.excusegenerator.infrastructure.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -3,7 +3,7 @@ package com.ilyasbugra.excusegenerator.v2.service;
 import com.ilyasbugra.excusegenerator.exception.InvalidInputException;
 import com.ilyasbugra.excusegenerator.exception.UserNotFoundException;
 import com.ilyasbugra.excusegenerator.exception.UsernameAlreadyTakenException;
-import com.ilyasbugra.excusegenerator.security.JwtUtil;
+import com.ilyasbugra.excusegenerator.infrastructure.security.JwtUtil;
 import com.ilyasbugra.excusegenerator.v2.dto.UserLoginRequestDTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UserLoginResponseDTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UserSignUpRequestDTO;
