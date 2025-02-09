@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator.v2.util;
+package com.ilyasbugra.excusegenerator.v2.helper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
