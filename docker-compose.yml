@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  excuse-db:
+    image: postgres:latest
+    container_name: excuse-db-docker
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: excusedb
+    volumes:
+      - excuse-data:/var/lib/postgresql/data
+      - ./db-dump:/docker-entrypoint-initdb.d
+
+  excuse-api:
+    build: .
+    container_name: excuse-api-docker
+    restart: unless-stopped
+    depends_on:
+      - excuse-db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://excuse-db:5432/excusedb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    ports:
+      - "8080:8080"
+
+volumes:
+  excuse-data:
