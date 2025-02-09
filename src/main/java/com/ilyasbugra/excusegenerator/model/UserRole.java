@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator.v2.model;
+package com.ilyasbugra.excusegenerator.model;
 
 public enum UserRole {
     REGULAR,

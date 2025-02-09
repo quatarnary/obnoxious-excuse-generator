@@ -1,7 +1,7 @@
 package com.ilyasbugra.excusegenerator.v2.util;
 
 import com.ilyasbugra.excusegenerator.exception.UserNotFoundException;
-import com.ilyasbugra.excusegenerator.v2.model.User;
+import com.ilyasbugra.excusegenerator.model.User;
 import com.ilyasbugra.excusegenerator.v2.repository.UserRepository;
 import org.springframework.stereotype.Component;
 

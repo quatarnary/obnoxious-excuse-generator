@@ -1,6 +1,6 @@
 package com.ilyasbugra.excusegenerator.infrastructure.security;
 
-import com.ilyasbugra.excusegenerator.v2.model.UserRole;
+import com.ilyasbugra.excusegenerator.model.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

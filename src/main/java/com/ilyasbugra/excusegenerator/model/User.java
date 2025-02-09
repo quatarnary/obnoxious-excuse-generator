@@ -1,6 +1,5 @@
-package com.ilyasbugra.excusegenerator.v2.model;
+package com.ilyasbugra.excusegenerator.model;
 
-import com.ilyasbugra.excusegenerator.model.Excuse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
