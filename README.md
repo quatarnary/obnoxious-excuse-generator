@@ -4,6 +4,24 @@ you know I'll never remove the first and this one I guess lol
 # So yeah, this is the ExcuseGeneratorAPI.
 It should've been a resume project -which it is- but with waaaay less polish..
 
+## 🚀 How to Run
+
+So, you want to run the **ExcuseGeneratorAPI**? Easy. **Just two commands.**  
+
+```bash
+git clone https://github.com/quatarnary/obnoxious-excuse-generator.git
+cd obnoxious-excuse-generator
+docker-compose up --build
+```
+
+### 🚀 That's it. You're live.
+- **API is running at** [`http://localhost:8080`](http://localhost:8080)
+- **PostgreSQL is running inside the container at** `excuse-db-docker:5432`
+---
+### 💾 Requirements
+- Docker & Docker Compose
+- (Optional) Postman or cURL to send API requests
+
 ## What you are getting with this project.. well here is a quick rundown:
 * CRUD, pagination, sorting, indexing (v1 is mainly focused on this part)
   * Used Lombok to write few lines of less code. Especially in love with the @Builder!
