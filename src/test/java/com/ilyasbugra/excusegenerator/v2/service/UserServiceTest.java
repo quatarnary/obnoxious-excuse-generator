@@ -1,5 +1,9 @@
 package com.ilyasbugra.excusegenerator.v2.service;
 
+import com.ilyasbugra.excusegenerator.dto.UserLoginRequestDTO;
+import com.ilyasbugra.excusegenerator.dto.UserLoginResponseDTO;
+import com.ilyasbugra.excusegenerator.dto.UserSignUpRequestDTO;
+import com.ilyasbugra.excusegenerator.dto.UserSignUpResponseDTO;
 import com.ilyasbugra.excusegenerator.exception.InvalidInputException;
 import com.ilyasbugra.excusegenerator.exception.UserNotFoundException;
 import com.ilyasbugra.excusegenerator.exception.UsernameAlreadyTakenException;
@@ -8,10 +12,6 @@ import com.ilyasbugra.excusegenerator.model.User;
 import com.ilyasbugra.excusegenerator.model.UserRole;
 import com.ilyasbugra.excusegenerator.repository.UserRepository;
 import com.ilyasbugra.excusegenerator.service.UserService;
-import com.ilyasbugra.excusegenerator.v2.dto.UserLoginRequestDTO;
-import com.ilyasbugra.excusegenerator.v2.dto.UserLoginResponseDTO;
-import com.ilyasbugra.excusegenerator.v2.dto.UserSignUpRequestDTO;
-import com.ilyasbugra.excusegenerator.v2.dto.UserSignUpResponseDTO;
 import com.ilyasbugra.excusegenerator.v2.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,5 +1,6 @@
-package com.ilyasbugra.excusegenerator.v2.dto;
+package com.ilyasbugra.excusegenerator.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,8 +10,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserSignUpResponseDTO {
+public class UserSignUpRequestDTO {
 
+    @NotBlank
     private String username;
-    private String message;
+
+    @NotBlank
+    private String password;
 }

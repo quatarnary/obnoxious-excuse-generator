@@ -1,11 +1,11 @@
 package com.ilyasbugra.excusegenerator.controller;
 
 
+import com.ilyasbugra.excusegenerator.dto.UserLoginRequestDTO;
+import com.ilyasbugra.excusegenerator.dto.UserLoginResponseDTO;
+import com.ilyasbugra.excusegenerator.dto.UserSignUpRequestDTO;
+import com.ilyasbugra.excusegenerator.dto.UserSignUpResponseDTO;
 import com.ilyasbugra.excusegenerator.service.UserService;
-import com.ilyasbugra.excusegenerator.v2.dto.UserLoginRequestDTO;
-import com.ilyasbugra.excusegenerator.v2.dto.UserLoginResponseDTO;
-import com.ilyasbugra.excusegenerator.v2.dto.UserSignUpRequestDTO;
-import com.ilyasbugra.excusegenerator.v2.dto.UserSignUpResponseDTO;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
