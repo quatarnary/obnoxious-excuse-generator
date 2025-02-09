@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator.v2.controller;
+package com.ilyasbugra.excusegenerator.controller;
 
 
 import com.ilyasbugra.excusegenerator.v2.dto.UserLoginRequestDTO;
