@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator.v2.repository;
+package com.ilyasbugra.excusegenerator.repository;
 
 import com.ilyasbugra.excusegenerator.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
