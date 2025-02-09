@@ -74,7 +74,7 @@ public class ExcuseV2Service {
 
     public ExcuseV2DTO updateExcuse(Long id, UpdateExcuseV2DTO updateExcuseV2DTO) {
         User user = userHelper.getAuthenticatedUser();
-        Excuse excuse = excuseHelper.getExcuseById(id);
+        Excuse excuse = excuseHelper.findByIdIncludingUnapproved(id);
 
         boolean canUpdate = switch (user.getUserRole()) {
             case ADMIN -> adminUser.updateExcuse(excuse, user);
@@ -96,7 +96,7 @@ public class ExcuseV2Service {
 
     public void deleteExcuse(Long id) {
         User user = userHelper.getAuthenticatedUser();
-        Excuse excuse = excuseHelper.getExcuseById(id);
+        Excuse excuse = excuseHelper.findByIdIncludingUnapproved(id);
 
         boolean canDelete = switch (user.getUserRole()) {
             case ADMIN -> adminUser.deleteExcuse();
@@ -113,7 +113,7 @@ public class ExcuseV2Service {
 
     public ExcuseV2DTO approveExcuse(Long id) {
         User user = userHelper.getAuthenticatedUser();
-        Excuse excuse = excuseHelper.getExcuseById(id);
+        Excuse excuse = excuseHelper.findByIdIncludingUnapproved(id);
 
         switch (user.getUserRole()) { // still here for consistency.
             case ADMIN -> adminUser.approveExcuse(excuse, user);

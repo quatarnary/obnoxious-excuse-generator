@@ -22,6 +22,11 @@ public class ExcuseHelper {
                 .orElseThrow(() -> new ExcuseNotFoundException(id));
     }
 
+    public Excuse findByIdIncludingUnapproved(Long id) {
+        return excuseRepository.findByIdIncludingUnapproved(id)
+                .orElseThrow(() -> new ExcuseNotFoundException(id));
+    }
+
     public Excuse getRandomExcuse() {
         Excuse excuse = excuseRepository.findRandomExcuse();
         if (excuse == null) throw new ExcuseNotFoundException(0L);
