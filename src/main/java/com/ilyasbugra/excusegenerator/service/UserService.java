@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator.v2.service;
+package com.ilyasbugra.excusegenerator.service;
 
 import com.ilyasbugra.excusegenerator.exception.InvalidInputException;
 import com.ilyasbugra.excusegenerator.exception.UserNotFoundException;

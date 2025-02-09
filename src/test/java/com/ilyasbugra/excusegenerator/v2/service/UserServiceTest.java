@@ -6,6 +6,7 @@ import com.ilyasbugra.excusegenerator.exception.UsernameAlreadyTakenException;
 import com.ilyasbugra.excusegenerator.infrastructure.security.JwtUtil;
 import com.ilyasbugra.excusegenerator.model.User;
 import com.ilyasbugra.excusegenerator.model.UserRole;
+import com.ilyasbugra.excusegenerator.service.UserService;
 import com.ilyasbugra.excusegenerator.v2.dto.UserLoginRequestDTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UserLoginResponseDTO;
 import com.ilyasbugra.excusegenerator.v2.dto.UserSignUpRequestDTO;
