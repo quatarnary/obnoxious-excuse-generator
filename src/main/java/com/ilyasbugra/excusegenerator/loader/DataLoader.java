@@ -5,6 +5,7 @@ import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -17,9 +18,10 @@ public class DataLoader implements CommandLineRunner {
     private static final Logger logger = LoggerFactory.getLogger(DataLoader.class);
 
     private static final int BATCH_SIZE = 8000;
-    private static final int requestedExcuseCount = 1_600_000;
-
     private final ExcuseRepository excuseRepository;
+
+    @Value("${excuse.loader.count:50000}")
+    private int requestedExcuseCount;
 
     public DataLoader(ExcuseRepository excuseRepository) {
         this.excuseRepository = excuseRepository;
@@ -31,8 +33,13 @@ public class DataLoader implements CommandLineRunner {
         logger.info("Database has {} excuses", excuseCount);
 
 
-        if (excuseCount >= requestedExcuseCount) {
-            logger.debug("Skipping data load. DB has enough data available!");
+//        if (excuseCount >= requestedExcuseCount) {
+//            logger.debug("Skipping data load. DB has enough data available!");
+//            return;
+//        }
+        // Skipping the data load
+        if (excuseCount < -1) {
+            logger.warn("Skipping data load. DataLoader as of right now is not functional.");
             return;
         }
 
