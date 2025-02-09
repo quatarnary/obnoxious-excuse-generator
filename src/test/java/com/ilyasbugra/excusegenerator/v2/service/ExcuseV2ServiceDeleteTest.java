@@ -1,13 +1,13 @@
 package com.ilyasbugra.excusegenerator.v2.service;
 
+import com.ilyasbugra.excusegenerator.actions.admin.AdminUser;
+import com.ilyasbugra.excusegenerator.actions.mod.ModUser;
 import com.ilyasbugra.excusegenerator.exception.UserNotAuthorized;
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.model.User;
 import com.ilyasbugra.excusegenerator.model.UserRole;
 import com.ilyasbugra.excusegenerator.repository.ExcuseRepository;
 import com.ilyasbugra.excusegenerator.util.UserErrorMessages;
-import com.ilyasbugra.excusegenerator.v2.actions.admin.AdminUser;
-import com.ilyasbugra.excusegenerator.v2.actions.mod.ModUser;
 import com.ilyasbugra.excusegenerator.v2.util.ExcuseHelper;
 import com.ilyasbugra.excusegenerator.v2.util.UserHelper;
 import org.junit.jupiter.api.BeforeEach;

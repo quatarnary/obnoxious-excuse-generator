@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator.v2.actions.mod;
+package com.ilyasbugra.excusegenerator.actions.mod;
 
 import com.ilyasbugra.excusegenerator.model.Excuse;
 import com.ilyasbugra.excusegenerator.model.User;

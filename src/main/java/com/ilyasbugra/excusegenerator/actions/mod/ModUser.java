@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator.v2.actions.mod;
+package com.ilyasbugra.excusegenerator.actions.mod;
 
 import org.springframework.stereotype.Component;
 
