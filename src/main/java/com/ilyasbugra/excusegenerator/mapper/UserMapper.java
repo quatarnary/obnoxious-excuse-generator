@@ -1,4 +1,4 @@
-package com.ilyasbugra.excusegenerator.v2.mapper;
+package com.ilyasbugra.excusegenerator.mapper;
 
 import com.ilyasbugra.excusegenerator.dto.UserLoginResponseDTO;
 import com.ilyasbugra.excusegenerator.dto.UserSignUpRequestDTO;
