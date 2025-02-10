@@ -17,6 +17,26 @@ docker-compose up --build
 ### 🚀 That's it. You're live.
 - **API is running at** [`http://localhost:8080`](http://localhost:8080)
 - **PostgreSQL is running inside the container at** `excuse-db-docker:5432`
+
+## 🧑‍💻 Dummy Users for Testing
+
+To make testing easier, here are some pre-created users:
+
+| Username         | Password         | Role    |
+|------------------|------------------|---------|
+| `test-user`      | `test-password`  | REGULAR |
+| `mod-user`       | `mod-password`   | MOD     |
+| `admin-user-2`   | `admin-password` | ADMIN   |
+
+📌 **How to Use:**
+- **Login with `POST /api/v2/users/login`** and get a JWT token.
+ - request-body for regular user: `{ "username": "test-user", "password": "test-password" }`
+ - request-body for mod user:     `{ "username": "mod-user", "password": "mod-password" }`
+ - request-body for admin user:   `{ "username": "admin-user-2", "password": "admin-password" }`
+- **Use the token in `Authorization: Bearer <your-token>` header for all requests.**
+
+🔥 Now you can test **role-based access** with ease!
+
 ---
 ### 💾 Requirements
 - Docker & Docker Compose
