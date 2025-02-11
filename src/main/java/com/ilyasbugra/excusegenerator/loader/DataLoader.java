@@ -38,7 +38,7 @@ public class DataLoader implements CommandLineRunner {
 //            return;
 //        }
         // Skipping the data load
-        if (excuseCount < -1) {
+        if (excuseCount > -1) {
             logger.warn("Skipping data load. DataLoader as of right now is not functional.");
             return;
         }
