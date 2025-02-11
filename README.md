@@ -1,3 +1,11 @@
+> [!CAUTION]
+> GitHub LFS download bandwith exceeded. I had no idea we had a limit.
+> Ad hoc solution. I put the db-dump to google drive to following link.
+> https://drive.google.com/file/d/1sVXciO0OMpc7evN0W4heLv-HcIQ1mZPU/view?usp=sharing
+
+> [!NOTE]
+> I'll try to fix the issue (hopefully) before someone sees it. But just in case...
+
 well there is nothing here but if I don't break the empty page I'll never find courage to work on that so here is the first version of README.md...
 you know I'll never remove the first and this one I guess lol
 
